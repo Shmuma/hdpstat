@@ -1,0 +1,18 @@
+{
+        "Oozie launcher": "oozie:launcher",
+
+        "Fetcher": [
+                   "\\[FETCHER\\]",
+                   "\\[FIX\\]"
+        ],
+
+        "Webmaster": "\\[WEBMASTER\\]",
+
+        "Click rank": "\\[CR\\]",
+
+        "Firstmeet": "\\[Firstmeet\\]",
+
+        "Buttons": "\\[BS\\]",
+
+        "QDDB": "\\[QDDB\\]"
+}

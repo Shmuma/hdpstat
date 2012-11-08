@@ -1,0 +1,15 @@
+{
+        "WorkDir": ".",
+
+        "TaskClassesFile": "tasks_classes.json",
+
+        "DBHost": "localhost",
+        "DBUser": "shmuma",
+        "DBPass": "",
+        "DBName": "hdpstat",
+
+        "JobTrackerHistoryDir": "/home/shmuma/tmp/history",
+
+        "WatcherInterval": 30,
+        "WatcherStateFile": "watcher-state.dat"
+}
