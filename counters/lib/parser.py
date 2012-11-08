@@ -65,7 +65,7 @@ class JobInfo (object):
 #                    logging.info ("Parsed finish time %s for job %s, line '%s'" % (val, self.vals["JOBID"], l))
 #                elif key == "JOB_STATUS":
 #                    logging.info ("Parsed job status %s for job %s, line '%s'" % (val, self.vals["JOBID"], l))
-                self.vals[key] = val
+                self.vals[key] = val.replace ('\\', '')
             elif key == "COUNTERS":
                 self.counters = parseCounters (val)
 

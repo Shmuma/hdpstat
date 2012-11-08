@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python2.7
 
 """
 Watchers for task result file in jobtracker history dir, parses them and imports into DB.
@@ -9,7 +9,7 @@ import logging
 import time
 
 from counters.lib import parser
-#from counters.lib import db
+from counters.lib import data
 from counters.lib import watcher
 from counters.lib import tasks
 from counters.lib import settings
@@ -31,8 +31,7 @@ watch_interval = int (opts['WatcherInterval'])
 logging.basicConfig (format="%(asctime)s: %(message)s", level=logging.INFO)
 
 w = watcher.HadoopWatcher (JT_History, JT_History + "/done", opts['WatcherStateFile'])
-#dbc = db.DBConnection (opts['DBHost'], opts['DBUser'], opts['DBPass'], opts['DBName'])
-#processor = db.CounterDataProcessor (dbc)
+importer = data.CounterDataImporter ()
 
 iteration = 0
 
@@ -53,11 +52,11 @@ if True:
                     pool = parser.getPoolFromJobConfig (je.config_file)
                     if pool != None:
                         counterParser.setPool (pool)
-#                        taskInstanceID = processor.handleJobInfo (counterParser.jobInfo)
-#                        if taskInstanceID == None:
-#                            logging.info ("No jobInfo, skip")
-#                        else:
-#                            processor.handleTasks (taskInstanceID, counterParser.jobInfo, counterParser.tasks)
+                        if importer.isValidJobInfo (counterParser.jobInfo):
+                            taskInstance = importer.handleJobInfo (counterParser.jobInfo)
+                            importer.handleCounters (taskInstance, counterParser.tasks)
+                        else:
+                            logging.info ("Job info is not complete yet, skip")
                     else:
                         logging.warn ("Pool not found, skip")
                 else:
@@ -78,7 +77,7 @@ if True:
                 dbc.buryZombies (zombies)
                 logging.info ("Zombies destroyed!")
             else:
-                logging.info ("No zombies found")       
+                logging.info ("No zombies found")
 
 #except:
 #    e_info = sys.exc_info ()
