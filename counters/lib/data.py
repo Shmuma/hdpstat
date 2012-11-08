@@ -18,6 +18,22 @@ def hadoopTimestampToDT (ts):
         return datetime.datetime.fromtimestamp (ts/1000.0, timezone.get_current_timezone ())
 
 
+def getLatestTTID ():
+    qs = TaskInstance.objects.order_by ('-jobid')
+    if qs.count () == 0:
+        return None
+    jid = qs[0].jobid
+    return "_".join (jid.split ("_")[0:2])
+
+
+def buryZombies (self, jobIDs):
+    """
+    Mark all running jobs from given list as KILLED
+    """
+    status = TaskInstance.statusValue ('KILLED')
+    TaskInstance.objects.filter (jobid__in=jobIDs).update (status=status)
+
+
 class CounterDataImporter (object):
     def isValidJobInfo (self, jobInfo):
         vals = ["JOBID", 'POOL', 'USER']
