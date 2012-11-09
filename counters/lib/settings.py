@@ -3,6 +3,7 @@ Global settings reader
 """
 import json
 import os.path
+import sys
 
 from hdpstat.settings import DATABASES
 
@@ -25,3 +26,15 @@ def updateDjango (opts):
     DATABASES['default']['NAME'] = opts['DBName']
     DATABASES['default']['USER'] = opts['DBUser']
     DATABASES['default']['PASSWORD'] = opts['DBPass']
+
+
+def init ():
+    settings_file = "~/.hdpstat"
+
+    opts = read (settings_file)
+    if opts == None:
+        print "Error: config file '%s' not found! Please, create it" % settings_file
+        sys.exit (1)
+
+    updateDjango (opts)
+    return opts

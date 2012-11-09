@@ -4,34 +4,31 @@ Tasks classifier - reclassify all tasks from DB
 import os
 import sys
 
-from lib import db
-from lib import tasks
-from lib import settings
+from counters.lib import tasks
+from counters.lib import settings
 
-settings_file = "~/.hdpstat"
+from counters.models import Task, TaskGroup
 
-opts = settings.read (settings_file)
-if opts == None:
-    print "Error: config file '%s' not found! Please, create it" % settings_file
-    sys.exit (1)
+from django.core.management.base import BaseCommand, CommandError
 
-os.chdir (opts['WorkDir'])
-tasks.init (opts['TaskClassesFile'])
 
-dbc = db.DBConnection (opts['DBHost'], opts['DBUser'], opts['DBPass'], opts['DBName'])
-total = 0
-updated = 0
+class Command (BaseCommand):
+    def handle (self, *args, **options):
+        opts = settings.init ()
 
-for task in dbc.allTasks ():
-    group = tasks.classify (task['taskName'])
-    total += 1
-    if group != task['groupName']:
-        groupID = dbc.lookupTaskGroup (group)
-        if groupID != task['groupID']:
-            dbc.updateTaskGroup (task['id'], groupID)
-            print "Task '%s' assigned to group '%s'" % (task['taskName'], group)
-            updated += 1
+        os.chdir (opts['WorkDir'])
+        tasks.init (opts['TaskClassesFile'])
 
-print "Processed %d tasks, updated %d" % (total, updated)
+        total = updated = 0
+
+        for t in Task.objects.all ():
+            groupName = tasks.classify (t.name)
+            total += 1
+            if groupName != t.taskGroup.name:
+                group = TaskGroup.objects.get_or_create (name=groupName)[0]
+                t.taskGroup = group
+                t.save ()
+                updated += 1
+        print "Processed %d tasks, updated %d" % (total, updated)
 
 

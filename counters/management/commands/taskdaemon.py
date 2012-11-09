@@ -14,14 +14,7 @@ from counters.lib import watcher
 from counters.lib import tasks
 from counters.lib import settings
 
-settings_file = "~/.hdpstat"
-
-opts = settings.read (settings_file)
-if opts == None:
-    print "Error: config file '%s' not found! Please, create it" % settings_file
-    sys.exit (1)
-
-settings.updateDjango (opts)
+opts = settings.init ()
 
 os.chdir (opts['WorkDir'])
 

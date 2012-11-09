@@ -7,12 +7,9 @@
         ],
 
         "Webmaster": "\\[WEBMASTER\\]",
-
         "Click rank": "\\[CR\\]",
-
         "Firstmeet": "\\[Firstmeet\\]",
-
         "Buttons": "\\[BS\\]",
-
-        "QDDB": "\\[QDDB\\]"
+        "QDDB": "\\[QDDB\\]",
+        "Ranker": "\\[Ranker\\]"
 }
