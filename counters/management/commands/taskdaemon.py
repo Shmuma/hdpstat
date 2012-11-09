@@ -21,6 +21,8 @@ if opts == None:
     print "Error: config file '%s' not found! Please, create it" % settings_file
     sys.exit (1)
 
+settings.updateDjango (opts)
+
 os.chdir (opts['WorkDir'])
 
 tasks.init (opts['TaskClassesFile'])

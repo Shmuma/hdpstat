@@ -4,6 +4,7 @@ Global settings reader
 import json
 import os.path
 
+from hdpstat.settings import DATABASES
 
 def read (fname):
     """
@@ -15,3 +16,12 @@ def read (fname):
 
     with open (fname, "r") as fd:
         return json.load (fd)
+
+
+def updateDjango (opts):
+    """
+    Change Django DB settings according to options
+    """
+    DATABASES['default']['NAME'] = opts['DBName']
+    DATABASES['default']['USER'] = opts['DBUser']
+    DATABASES['default']['PASSWORD'] = opts['DBPass']
