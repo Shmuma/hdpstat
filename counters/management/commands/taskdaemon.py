@@ -55,6 +55,8 @@ while True:
                     logging.warn ("Pool not found, skip")
             else:
                 logging.warn ("JobID not found, skip")
+            je.processed ()
+        w.checkpoint ()
     else:
         logging.info ("Done, nothing changed")
 

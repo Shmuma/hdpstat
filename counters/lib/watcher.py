@@ -34,9 +34,14 @@ class HadoopWatcher (object):
         running = self._process_dir (self.running_dir, self.running_entries)
         done = self._process_dir (self.done_dir, self.done_entries)
 
-        self._save_state ()
-
         return running + done
+
+
+    def checkpoint (self):
+        """
+        Save state - all entries processed by caller
+        """
+        self._save_state ()
 
 
     def _save_state (self):
@@ -119,8 +124,8 @@ class HadoopWatcher (object):
                     if not xml_name in entries:
                         # new job entry, create it
                         je = JobEntry (counter_name, xml_name)
-                        entries[xml_name] = je
                         fresh.append (je)
+                        entries[xml_name] = je
                     else:
                         # job entry exists, check for update
                         je = entries[xml_name]
@@ -161,10 +166,12 @@ class JobEntry (object):
     counter_size = None
     config_size = None
 
+    fresh = True
 
     def __init__ (self, counter_file, config_file):
         self.counter_file = counter_file
         self.config_file = config_file
+        self.fresh = True
 
         self._update_state (os.stat (counter_file), os.stat (config_file))
 
@@ -187,11 +194,18 @@ class JobEntry (object):
 
 
     def check (self):
+        if self.fresh:
+            return True
         if self.exists ():
-            return self._update_state (os.stat (self.counter_file), os.stat (self.config_file))
-        else:
-            return False
+            if self._update_state (os.stat (self.counter_file), os.stat (self.config_file)):
+                self.fresh = True
+                return True
+        return False
 
 
     def exists (self):
         return os.path.exists (self.counter_file) and os.path.exists (self.config_file)
+
+
+    def processed (self):
+        self.fresh = False
