@@ -26,7 +26,7 @@ def getLatestTTID ():
     return "_".join (jid.split ("_")[0:2])
 
 
-def buryZombies (self, jobIDs):
+def buryZombies (jobIDs):
     """
     Mark all running jobs from given list as KILLED
     """
