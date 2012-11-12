@@ -88,9 +88,9 @@ class CounterDataImporter (object):
         return taskInstance
 
 
-    def handleCounters (self, taskInstance, tasks):
+    def handleCounters (self, taskInstance, jobInfo, tasks):
         """
-        Updates intermediate counter values for a job
+        Updates intermediate counter values for a job, then merge final jobInfo counters
         """
         # delete existing counters
         CounterValue.objects.filter (taskInstance=taskInstance).delete ()
@@ -120,9 +120,16 @@ class CounterDataImporter (object):
                 else:
                     blacklist.add (tag)
 
-
+        # all counter values are summed up
         for t in tasks.values ():
             t.processCounters (lambda c: processCounter (result, blacklist, whitelist, c))
+
+        # then, we process final counters form jobInfo, but only not present in a list
+        for gname, tag, val in jobInfo.counters:
+            if not tag in result:
+                group = counters.classify (tag)
+                if group != None:
+                    result[tag] = long (val)
 
         counterValueList = []
         for tag, val in result.iteritems ():
