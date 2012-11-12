@@ -125,11 +125,12 @@ class CounterDataImporter (object):
             t.processCounters (lambda c: processCounter (result, blacklist, whitelist, c))
 
         # then, we process final counters form jobInfo, but only not present in a list
-        for gname, tag, val in jobInfo.counters:
-            if not tag in result:
-                group = counters.classify (tag)
-                if group != None:
-                    result[tag] = long (val)
+        if jobInfo.counters != None:
+            for gname, tag, val in jobInfo.counters:
+                if not tag in result:
+                    group = counters.classify (tag)
+                    if group != None:
+                        result[tag] = long (val)
 
         counterValueList = []
         for tag, val in result.iteritems ():
