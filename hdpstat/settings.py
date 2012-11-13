@@ -1,5 +1,8 @@
 # Django settings for hdpstat project.
 
+import basedir
+BASEDIR = basedir.BASEDIR
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -64,7 +67,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    '/home/shmuma/work/hdpstat/static',
+    BASEDIR + '/static',
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -104,7 +107,7 @@ ROOT_URLCONF = 'hdpstat.urls'
 WSGI_APPLICATION = 'hdpstat.wsgi.application'
 
 TEMPLATE_DIRS = (
-    "/home/shmuma/work/hdpstat/counters/templates",
+    BASEDIR + "/counters/templates",
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.

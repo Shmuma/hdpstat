@@ -6,6 +6,7 @@ import datetime
 
 import tasks
 import counters
+import parser
 
 
 def hadoopTimestampToDT (ts):
@@ -45,7 +46,9 @@ class CounterDataImporter (object):
         return True
 
 
-    def handleJobInfo (self, jobInfo):
+    def handleJobInfo (self, counterParser):
+        jobInfo, tasksDict = counterParser.jobInfo, counterParser.tasks
+
         jobid = jobInfo.vals["JOBID"]
         pool = Pool.objects.get_or_create (name=jobInfo.vals["POOL"])[0]
         user = User.objects.get_or_create (name=jobInfo.vals["USER"])[0]
@@ -54,6 +57,11 @@ class CounterDataImporter (object):
         submitted = hadoopTimestampToDT (long (jobInfo.vals.get ("SUBMIT_TIME", 0)))
         started = hadoopTimestampToDT (long (jobInfo.vals.get ("LAUNCH_TIME", 0)))
         finished = hadoopTimestampToDT (long (jobInfo.vals.get ("FINISH_TIME", 0)))
+
+        map_tasks = [t for t in tasksDict.values () if t.taskType == "MAP"]
+        red_tasks = [t for t in tasksDict.values () if t.taskType == "REDUCE"]
+        started_maps, finished_maps = map (hadoopTimestampToDT, parser.getTasksTimeInterval (map_tasks))
+        started_reducers, finished_reducers = map (hadoopTimestampToDT, parser.getTasksTimeInterval (red_tasks))
 
         mappers = long (jobInfo.vals.get ("TOTAL_MAPS", 0))
         reducers = long (jobInfo.vals.get ("TOTAL_REDUCES", 0))
@@ -70,6 +78,10 @@ class CounterDataImporter (object):
             'submitted': submitted,
             'started': started,
             'finished': finished,
+            'started_maps': started_maps,
+            'finished_maps': finished_maps,
+            'started_reducers': started_reducers,
+            'finished_reducers': finished_reducers,
             'mappers': mappers,
             'reducers': reducers,
             'status': TaskInstance.statusValue (status),
@@ -88,10 +100,12 @@ class CounterDataImporter (object):
         return taskInstance
 
 
-    def handleCounters (self, taskInstance, jobInfo, tasks):
+    def handleCounters (self, taskInstance, counterParser):
         """
         Updates intermediate counter values for a job, then merge final jobInfo counters
         """
+        jobInfo, tasks = counterParser.jobInfo, counterParser.tasks
+
         # delete existing counters
         CounterValue.objects.filter (taskInstance=taskInstance).delete ()
 

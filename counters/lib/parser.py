@@ -114,8 +114,8 @@ class TaskInfo (object):
     taskID = None
     status = None
     taskType = None
-    startTime = None
-    finishTime = None
+    startTime = 0
+    finishTime = 0
     attempts = {}
 
 
@@ -257,3 +257,15 @@ def getPoolFromJobConfig (confFileName):
                 res = l[pos+len (v):l.find ("</value>")]
                 return res
     return "default"
+
+
+def getTasksTimeInterval (tasks):
+    """
+    By given list of TaskInfo, find earliest start and latest finish times. Return zero if list is empty
+    """
+    if len (tasks) == 0:
+        return (0, 0)
+
+    start  = min (map (lambda t: long (t.startTime), tasks))
+    finish = max (map (lambda t: long (t.finishTime), tasks))
+    return (start, finish)

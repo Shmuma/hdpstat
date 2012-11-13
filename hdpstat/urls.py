@@ -6,6 +6,7 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
                        url (r'^pools_all_time', 'counters.views.overview_pools_all_time'), 
+                       url (r'^pools_interval', 'counters.views.overview_pools_interval'), 
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),
     # url(r'^hdpstat/', include('hdpstat.foo.urls')),

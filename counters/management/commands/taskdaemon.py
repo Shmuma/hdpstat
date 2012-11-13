@@ -47,8 +47,8 @@ while True:
                 if pool != None:
                     counterParser.setPool (pool)
                     if importer.isValidJobInfo (counterParser.jobInfo):
-                        taskInstance = importer.handleJobInfo (counterParser.jobInfo)
-                        importer.handleCounters (taskInstance, counterParser.jobInfo, counterParser.tasks)
+                        taskInstance = importer.handleJobInfo (counterParser)
+                        importer.handleCounters (taskInstance, counterParser)
                     else:
                         logging.info ("Job info is not complete yet, skip")
                 else:

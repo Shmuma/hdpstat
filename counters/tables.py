@@ -4,7 +4,7 @@ from counters.models import Pool
 
 import datetime
 
-class MilisecondColumn (tables.TemplateColumn):
+class MilisecondColumn (tables.Column):
     """
     A column that renders miliseconds timedelta value into human-readable form
     """

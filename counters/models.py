@@ -48,6 +48,11 @@ class TaskInstance (models.Model):
     started = models.DateTimeField (null=True)
     finished = models.DateTimeField (null=True)
 
+    started_maps = models.DateTimeField (null=True)
+    finished_maps = models.DateTimeField (null=True)
+    started_reducers = models.DateTimeField (null=True)
+    finished_reducers = models.DateTimeField (null=True)
+
     mappers = models.PositiveIntegerField ()
     reducers = models.PositiveIntegerField ()
 
