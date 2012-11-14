@@ -17,13 +17,11 @@ def overview_pools_all_time (request):
 
 
 def overview_pools_interval (request):
-    # three days back
-    dt_to = datetime.datetime (year=2012, month=11, day=1, tzinfo=timezone.get_current_timezone ())
-    dt_from = dt_to - datetime.timedelta (days=3)
-    report = pools_resources_interval (dt_from=dt_from, dt_to=dt_to)
-    res = "from = %s, to = %s</br></br>" % (dt_from, dt_to)
-    for r in report.keys ():
-        res += "%s =></br>" % r
-        for ti in report[r]:
-            res += "%s, started=%s, finished=%s</br>" % (ti, ti.started, ti.finished)
-    return HttpResponse (res)
+    back_days = int (request.GET.get ("days", 14))
+    dt_to = datetime.datetime.now (timezone.get_current_timezone ())
+    dt_from = dt_to - datetime.timedelta (days=back_days)
+    data = pools_resources_interval (dt_from=dt_from, dt_to=dt_to)
+    table = PoolsResourcesTable (data)
+
+    RequestConfig (request, paginate=False).configure (table)
+    return render (request, 'counters/overview_resources.html', {'table': table, 'title': "CPU time usage by pools %d days back" % back_days})

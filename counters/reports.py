@@ -1,48 +1,127 @@
+import sys
 import datetime
+import time
 
 from django.utils import timezone
 from django.db import connection
 
-from models import TaskInstance, CounterValue
+from models import TaskInstance, CounterValue, Counter
+
+
+def get_resource_counter_ids ():
+    """
+    Lookup IDs of MAP_WALL_CLOCK_MS and REDUCE_WALL_CLOCK_MS counters. Return them in a tuple
+    """
+    return (Counter.objects.get (tag="MAP_WALL_CLOCK_MS").id, Counter.objects.get (tag="REDUCE_WALL_CLOCK_MS").id)
+
+
+def get_jobs_resource_usages (map_counter_id, red_counter_id, where_part="1=1", query_args=None):
+    """
+    Generates tuples (jobid, pool_name, mappers_time, reducers_time, map_start, map_finish, red_start, red_finish)
+    """
+    sql = """select ti.jobid, pool.name as pool_name, coalesce(cv1.value, 0) as map_time,
+	     coalesce(cv2.value, 0) as red_time,
+             ti.started_maps, ti.finished_maps, ti.started_reducers, ti.finished_reducers
+	     from counters_pool pool, counters_taskinstance ti
+	     left outer join counters_countervalue cv1
+	     on cv1.taskinstance_id = ti.id and cv1.counter_id=%(map_counter_id)d
+	     left outer join counters_countervalue cv2
+	     on cv2.taskinstance_id = ti.id and cv2.counter_id=%(red_counter_id)d
+	     where pool.id = ti.pool_id and %(where_part)s""" % {'map_counter_id': map_counter_id, 'red_counter_id': red_counter_id,
+                                                                 'where_part': where_part}
+    cur = connection.cursor ()
+    cur.execute (sql, query_args)
+    for entry in cur.fetchall ():
+        yield entry
 
 
 def pools_resources_all_time ():
     """
     Returns list with pool resources used. Result is a list of dicts with pool and time entries
     """
-    sql = "select p.name, sum(cv.value) as time_ms from counters_counter c, counters_countervalue cv, counters_taskinstance ti, counters_pool p  where c.tag in ('MAP_WALL_CLOCK_MS', 'REDUCE_WALL_CLOCK_MS') and cv.counter_id = c.id and ti.id = cv.taskinstance_id and p.id = ti.pool_id group by p.id order by p.name"
+    map_counter_id, reduce_counter_id = get_resource_counter_ids ()
 
-    cur = connection.cursor ()
-    cur.execute (sql)
-    return [{'pool': ent[0], 'time': long (ent[1])} for ent in cur.fetchall ()]
+    # pool name -> result dict
+    resources = {}
+
+    for jobid, pool_name, map_time, red_time, map_start, map_finish, red_start, red_finish in get_jobs_resource_usages (map_counter_id, reduce_counter_id):
+        pool_data = resources.get (pool_name, {'pool': pool_name, 'time': 0L, 'map_time': 0L, 'reduce_time': 0L})
+        pool_data['time'] += map_time + red_time
+        pool_data['map_time'] += map_time
+        pool_data['reduce_time'] += red_time
+        resources[pool_name] = pool_data
+    return resources.values ()
+
+
+def get_overlap_fraction (int_a, int_b):
+    """
+    Returns fraction of b shared with a
+    """
+    if int_b[0] == None or int_b[1] == None:
+        return 0.0
+
+    def inside (val, interval):
+        return val >= interval[0] and val <= interval[1]
+
+    b_len = (int_b[1] - int_b[0]).total_seconds ()
+
+    # inside
+    if inside (int_b[0], int_a) and inside (int_b[1], int_a):
+        return 1.0
+    # left
+    if inside (int_b[1], int_a) and int_b[0] < int_a[0]:
+        return (int_b[1] - int_a[0]).total_seconds () / b_len
+    # right
+    if inside (int_b[0], int_a) and int_b[1] > int_a[1]:
+        return (int_a[1] - int_b[0]).total_seconds () / b_len
+    # outside
+    if inside (int_a[0], int_b) and inside (int_a[1], int_b):
+        return (int_a[1] - int_a[0]).total_seconds () / b_len
+
+    # don't overlap
+    return 0.0
 
 
 def pools_resources_interval (dt_from, dt_to):
     """
     Return the some as all_time report, but limited by time interval
     """
-    counter_tags = ['MAP_WALL_CLOCK_MS', 'REDUCE_WALL_CLOCK_MS']
+    map_counter_id, reduce_counter_id = get_resource_counter_ids ()
 
-    # 1. falls in interval entirely
-    ti_inside = TaskInstance.objects.filter (started__gte=dt_from, finished__lte=dt_to)
-    # 2. intersect left bound
-    ti_left = TaskInstance.objects.filter (started__lt=dt_from, finished__lte=dt_to, finished__gte=dt_from)
-    # 3. intersect right bound
-    ti_right = TaskInstance.objects.filter (started__gte=dt_from, started__lte=dt_to, finished__gt=dt_to)
-    # 4. intersect both bounds
-    ti_both = TaskInstance.objects.filter (started__lt=dt_from, finished__gt=dt_to)
+    # pool name -> result dict
+    resources = {}
 
-    pools_usage = {}
+    queries = {
+        # 1. falls in interval entirely
+        'inside':
+            {'where_part': "ti.started >= %s and ti.finished <= %s",
+             'query_args': [dt_from, dt_to]},
+        # 2. intersect left bound
+        'left':
+            {'where_part': "ti.started < %s and ti.finished <= %s and ti.finished > %s",
+             'query_args': [dt_from, dt_to, dt_from]},
+        # 3. intersect right bound
+        'right':
+            {'where_part': "ti.started >= %s and ti.started <= %s and ti.finished > %s",
+             'query_args': [dt_from, dt_to, dt_to]},
+        # 4. intersect both bounds
+        'both':
+            {'where_part': "ti.started < %s and ti.finished > %s",
+             'query_args': [dt_from, dt_to]},
+        }
 
-    # inside tasks are simple - just count their pools resource usage
-    for ti in ti_inside:
-        counterValues = CounterValue.objects.filter(taskInstance=ti, counter__tag__in=counter_tags)
-        value = sum (map (lambda cv: cv.value, counterValues))
-        pools_usage[ti.pool.name] = pools_usage.get (ti.pool.name, 0) + value
+    for qargs in queries.values ():
+        for jobid, pool_name, map_time, red_time, map_start, map_finish, red_start, red_finish in get_jobs_resource_usages (map_counter_id, reduce_counter_id, **qargs):
+            map_fraction = get_overlap_fraction ((dt_from, dt_to), (map_start, map_finish))
+            red_fraction = get_overlap_fraction ((dt_from, dt_to), (red_start, red_finish))
 
-    # left-bound tasks
+            pool_data = resources.get (pool_name, {'pool': pool_name, 'time': 0L, 'map_time': 0L, 'reduce_time': 0L})
+            pool_data['time'] += map_time * map_fraction + red_time * red_fraction
+            pool_data['map_time'] += map_time * map_fraction
+            pool_data['reduce_time'] += red_time * red_fraction
+            resources[pool_name] = pool_data
 
-    return pools_usage
+    return resources.values ()
 
 
 def test_interval ():

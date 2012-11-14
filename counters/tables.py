@@ -4,9 +4,9 @@ from counters.models import Pool
 
 import datetime
 
-class MilisecondColumn (tables.Column):
+class MillisecondColumn (tables.Column):
     """
-    A column that renders miliseconds timedelta value into human-readable form
+    A column that renders milliseconds timedelta value into human-readable form
     """
     def render (self, value):
         return str (datetime.timedelta (seconds=long (value/1000)))
@@ -14,7 +14,9 @@ class MilisecondColumn (tables.Column):
 
 class PoolsResourcesTable (tables.Table):
     pool = tables.Column ()
-    time = MilisecondColumn ()
+    time = MillisecondColumn ()
+    map_time = MillisecondColumn ()
+    reduce_time = MillisecondColumn ()
 
     class Meta:
         attrs = {"class": "paleblue"}
