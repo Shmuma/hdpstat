@@ -45,8 +45,8 @@ class TaskInstance (models.Model):
     user = models.ForeignKey (User)
 
     submitted = models.DateTimeField (null=True)
-    started = models.DateTimeField (null=True)
-    finished = models.DateTimeField (null=True)
+    started = models.DateTimeField (null=True, db_index=True)
+    finished = models.DateTimeField (null=True, db_index=True)
 
     started_maps = models.DateTimeField (null=True)
     finished_maps = models.DateTimeField (null=True)
