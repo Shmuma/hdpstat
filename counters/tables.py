@@ -74,13 +74,12 @@ class JobsTable (tables.Table):
         attrs = {"class": "paleblue"}
 
     jobid = tables.Column ()
+    status = tables.Column ()
     pool = tables.Column ()
     user = tables.Column ()
 
     submitted = tables.DateTimeColumn ()
     duration = TimedeltaColumn ()
 
-    mappers = tables.Column ()
-    reducers = tables.Column ()
-
-    status = tables.Column ()
+    HDFS_BYTES_WRITTEN = LargeNumberColumn ()
+    HDFS_BYTES_READ = LargeNumberColumn ()

@@ -131,13 +131,17 @@ def test_interval ():
     return report
 
 
-def jobs_history (pool=None, user=None, status=None):
-    result = []
+def jobs_history (pool=None, user=None, status=None, counter_groups=("Time", "TaskIO")):
+    if len (counter_groups) == 0:
+        counter_groups = ("Time")
 
-    sql = """select ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.mappers, ti.reducers, ti.status
-from counters_taskinstance ti, counters_pool p, counters_user u
-where p.id = ti.pool_id and u.id = ti.user_id
-"""
+    sql = """select ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status,
+cg.name as group_name, c.tag as counter_tag, c.name as counter_name, cv.value
+from counters_taskinstance ti, counters_pool p, counters_user u,
+counters_countervalue cv, counters_counter c, counters_countergroup cg
+where p.id = ti.pool_id and u.id = ti.user_id and cv.taskInstance_id = ti.id and
+c.id = cv.counter_id and cg.id = c.counterGroup_id and cg.name in %s
+""" % str (counter_groups)
     # handle filters
     sqlargs = []
     if pool:
@@ -152,21 +156,36 @@ where p.id = ti.pool_id and u.id = ti.user_id
 
     cur = connection.cursor ()
     cur.execute (sql, sqlargs)
+    sql += " order by ti.jobid"
 
-    for jobid, pool_name, user_name, submitted, finished, mappers, reducers, status in cur.fetchall ():
-        if finished == None:
-            duration = datetime.datetime.now (timezone.get_current_timezone ()) - submitted
-        else:
-            duration = finished - submitted
-        result.append ({
+    result = {}
+    tags = set ()
+
+    for entry in cur.fetchall ():
+        jobid, pool_name, user_name, submitted, finished, status, group_name, counter_tag, counter_name, value = entry
+        if not jobid in result:
+            if finished == None:
+                duration = datetime.datetime.now (timezone.get_current_timezone ()) - submitted
+            else:
+                duration = finished - submitted
+
+            cur_result = dict ({
                 'jobid': jobid,
                 'pool': pool_name,
                 'user': user_name,
                 'submitted': submitted,
                 'duration': duration,
-                'mappers': mappers,
-                'reducers': reducers,
                 'status': dict (TaskInstance.STATUSES).get (status),
                 })
+            result[jobid] = cur_result
 
-    return result
+        # handle value
+        result[jobid][counter_tag] = value
+        tags.add (counter_tag)
+
+    # if task is missing some value, add it with zero value
+    for v in result.values ():
+        for missing in tags - set (v.keys ()):
+            v[missing] = 0L
+
+    return result.values ()
