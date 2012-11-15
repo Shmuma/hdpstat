@@ -13,6 +13,17 @@ class MillisecondColumn (tables.Column):
         return str (datetime.timedelta (seconds=long (value/1000)))
 
 
+
+class TimedeltaColumn (tables.Column):
+    """
+    A column that renders timedeltas
+    """
+    def render (self, value):
+        # get rid of microseconds
+        td = datetime.timedelta (seconds=long (value.total_seconds ()))
+        return str (td)
+
+
 class LargeNumberColumn (tables.Column):
     """
     A column that renders large integer value into human-readable form (M, G, T, P, etc)
@@ -55,3 +66,21 @@ class PoolsResourcesTable (tables.Table):
 
     class Meta:
         attrs = {"class": "paleblue"}
+
+
+
+class JobsTable (tables.Table):
+    class Meta:
+        attrs = {"class": "paleblue"}
+
+    jobid = tables.Column ()
+    pool = tables.Column ()
+    user = tables.Column ()
+
+    submitted = tables.DateTimeColumn ()
+    duration = TimedeltaColumn ()
+
+    mappers = tables.Column ()
+    reducers = tables.Column ()
+
+    status = tables.Column ()

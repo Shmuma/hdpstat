@@ -129,3 +129,44 @@ def test_interval ():
     dt_from = dt_to - datetime.timedelta (days=3)
     report = pools_resources_interval (dt_from=dt_from, dt_to=dt_to)
     return report
+
+
+def jobs_history (pool=None, user=None, status=None):
+    result = []
+
+    sql = """select ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.mappers, ti.reducers, ti.status
+from counters_taskinstance ti, counters_pool p, counters_user u
+where p.id = ti.pool_id and u.id = ti.user_id
+"""
+    # handle filters
+    sqlargs = []
+    if pool:
+        sql += " and p.name = %s"
+        sqlargs.append (pool)
+    if user:
+        sql += " and u.name = %s"
+        sqlargs.append (user)
+    if status:
+        sql += " and ti.status = %s"
+        sqlargs.append (TaskInstance.statusValue (status))
+
+    cur = connection.cursor ()
+    cur.execute (sql, sqlargs)
+
+    for jobid, pool_name, user_name, submitted, finished, mappers, reducers, status in cur.fetchall ():
+        if finished == None:
+            duration = datetime.datetime.now (timezone.get_current_timezone ()) - submitted
+        else:
+            duration = finished - submitted
+        result.append ({
+                'jobid': jobid,
+                'pool': pool_name,
+                'user': user_name,
+                'submitted': submitted,
+                'duration': duration,
+                'mappers': mappers,
+                'reducers': reducers,
+                'status': dict (TaskInstance.STATUSES).get (status),
+                })
+
+    return result
