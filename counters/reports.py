@@ -131,7 +131,7 @@ def test_interval ():
     return report
 
 
-def jobs_history (pool=None, user=None, status=None, cgroup="Time", dt_from=None, dt_to=None):
+def jobs_history (pools=None, users=None, statuses=None, cgroup="Time", dt_from=None, dt_to=None):
     sql = """select ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status,
 c.tag as counter_tag, c.name as counter_name, cv.value
 from counters_taskinstance ti, counters_pool p, counters_user u,
@@ -141,15 +141,18 @@ c.id = cv.counter_id and cg.id = c.counterGroup_id and cg.name = %s
 """
     # handle filters
     sqlargs = [cgroup]
-    if pool:
-        sql += " and p.name = %s"
-        sqlargs.append (pool)
-    if user:
-        sql += " and u.name = %s"
-        sqlargs.append (user)
-    if status:
-        sql += " and ti.status = %s"
-        sqlargs.append (TaskInstance.statusValue (status))
+    if pools:
+        conds = ["p.name = %s"] * len (pools)
+        sql += "and (" + " or ".join (conds) + ")"
+        sqlargs += pools
+    if users:
+        conds = ["u.name = %s"] * len (users)
+        sql += "and (" + " or ".join (conds) + ")"
+        sqlargs += users
+    if statuses:
+        conds = ["ti.status = %s"] * len (statuses)
+        sql += "and (" + " or ".join (conds) + ")"
+        sqlargs += map (TaskInstance.statusValue, statuses)
     if dt_from:
         sql += " and ti.started >= %s"
         sqlargs.append (dt_from)

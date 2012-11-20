@@ -35,15 +35,15 @@ def jobs_view (request):
     Displays jobs list
     """
     # filters
-    pool = request.GET.get ("pool")
-    user = request.GET.get ("user")
-    status = request.GET.get ("status")
+    pools = request.GET.getlist ("pool")
+    users = request.GET.getlist ("user")
+    statuses = request.GET.getlist ("status")
     cgroup = request.GET.get ("cgroup", "Time")
     back_days = int (request.GET.get ("days", 14))
 
     dt_from = datetime.datetime.now (timezone.get_current_timezone ()) - datetime.timedelta (days=back_days)
 
-    data = jobs_history (pool=pool, user=user, status=status, cgroup=cgroup, dt_from=dt_from)
+    data = jobs_history (pools=pools, users=users, statuses=statuses, cgroup=cgroup, dt_from=dt_from)
     table = make_jobs_table (cgroup, data)
 
     RequestConfig (request, paginate=True).configure (table)
