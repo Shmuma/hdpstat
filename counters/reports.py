@@ -131,19 +131,16 @@ def test_interval ():
     return report
 
 
-def jobs_history (pool=None, user=None, status=None, counter_groups=("Time", "TaskIO")):
-    if len (counter_groups) == 0:
-        counter_groups = ("Time")
-
+def jobs_history (pool=None, user=None, status=None, cgroup="Time", dt_from=None, dt_to=None):
     sql = """select ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status,
-cg.name as group_name, c.tag as counter_tag, c.name as counter_name, cv.value
+c.tag as counter_tag, c.name as counter_name, cv.value
 from counters_taskinstance ti, counters_pool p, counters_user u,
 counters_countervalue cv, counters_counter c, counters_countergroup cg
 where p.id = ti.pool_id and u.id = ti.user_id and cv.taskInstance_id = ti.id and
-c.id = cv.counter_id and cg.id = c.counterGroup_id and cg.name in %s
-""" % str (counter_groups)
+c.id = cv.counter_id and cg.id = c.counterGroup_id and cg.name = %s
+"""
     # handle filters
-    sqlargs = []
+    sqlargs = [cgroup]
     if pool:
         sql += " and p.name = %s"
         sqlargs.append (pool)
@@ -153,6 +150,12 @@ c.id = cv.counter_id and cg.id = c.counterGroup_id and cg.name in %s
     if status:
         sql += " and ti.status = %s"
         sqlargs.append (TaskInstance.statusValue (status))
+    if dt_from:
+        sql += " and ti.started >= %s"
+        sqlargs.append (dt_from)
+    if dt_to:
+        sql += " and ti.started <= %s"
+        sqlargs.append (dt_to)
 
     cur = connection.cursor ()
     cur.execute (sql, sqlargs)
@@ -162,7 +165,7 @@ c.id = cv.counter_id and cg.id = c.counterGroup_id and cg.name in %s
     tags = set ()
 
     for entry in cur.fetchall ():
-        jobid, pool_name, user_name, submitted, finished, status, group_name, counter_tag, counter_name, value = entry
+        jobid, pool_name, user_name, submitted, finished, status, counter_tag, counter_name, value = entry
         if not jobid in result:
             if finished == None:
                 duration = datetime.datetime.now (timezone.get_current_timezone ()) - submitted

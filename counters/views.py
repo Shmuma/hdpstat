@@ -7,7 +7,7 @@ from django_tables2 import RequestConfig, Table
 
 from counters.models import Pool
 from counters.reports import pools_resources_all_time, pools_resources_interval, jobs_history
-from counters.tables import PoolsResourcesTable, JobsTable
+from counters.tables import PoolsResourcesTable, make_jobs_table
 
 
 def overview_pools_all_time (request):
@@ -38,9 +38,13 @@ def jobs_view (request):
     pool = request.GET.get ("pool")
     user = request.GET.get ("user")
     status = request.GET.get ("status")
+    cgroup = request.GET.get ("cgroup", "Time")
+    back_days = int (request.GET.get ("days", 14))
 
-    data = jobs_history (pool=pool, user=user, status=status)
-    table = JobsTable (data)
+    dt_from = datetime.datetime.now (timezone.get_current_timezone ()) - datetime.timedelta (days=back_days)
+
+    data = jobs_history (pool=pool, user=user, status=status, cgroup=cgroup, dt_from=dt_from)
+    table = make_jobs_table (cgroup, data)
 
     RequestConfig (request, paginate=True).configure (table)
     title = "Jobs history"
