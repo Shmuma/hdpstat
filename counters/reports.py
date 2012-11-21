@@ -195,7 +195,6 @@ where p.id = ti.pool_id and u.id = ti.user_id
         c_sql += " and cg.name = %s"
 
         cur = connection.cursor ()
-        print c_sql
         cur.execute (c_sql, [cgroup])
 
         tags = set ()

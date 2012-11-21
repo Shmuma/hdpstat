@@ -41,7 +41,7 @@ def jobs_view (request):
     users = request.GET.getlist ("user")
     statuses = request.GET.getlist ("status")
     cgroup = request.GET.get ("cgroup", "Time")
-    back_days = int (request.GET.get ("days", 14))
+    back_days = int (request.GET.get ("days", 1))
 
     filter_form = filters.FilterForm (request.GET)
 
