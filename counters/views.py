@@ -9,6 +9,8 @@ from counters.models import Pool
 from counters.reports import pools_resources_all_time, pools_resources_interval, jobs_history
 from counters.tables import PoolsResourcesTable, make_jobs_table
 
+from counters import filters
+
 
 def overview_pools_all_time (request):
     table = PoolsResourcesTable (pools_resources_all_time ())
@@ -41,6 +43,8 @@ def jobs_view (request):
     cgroup = request.GET.get ("cgroup", "Time")
     back_days = int (request.GET.get ("days", 14))
 
+    filter_form = filters.FilterForm (request.GET)
+
     dt_from = datetime.datetime.now (timezone.get_current_timezone ()) - datetime.timedelta (days=back_days)
 
     data = jobs_history (pools=pools, users=users, statuses=statuses, cgroup=cgroup, dt_from=dt_from)
@@ -49,4 +53,4 @@ def jobs_view (request):
     RequestConfig (request, paginate=True).configure (table)
     title = "Jobs history"
 
-    return render (request, "counters/overview_resources.html", {'table': table})
+    return render (request, "counters/jobs.html", {'table': table, 'filter_form': filter_form})

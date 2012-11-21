@@ -1,0 +1,30 @@
+{% load render_table from django_tables2 %}
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+        <link rel="stylesheet" href="{{ STATIC_URL }}counters/screen.css" />
+        <title>{{ title }}</title>
+    </head>
+    <body>
+      <div id="container">
+        <div id="table">
+          {% render_table table %}
+        </div>
+        <div id="filters">
+          <p>Filters:</p>
+          <form method="get" id="filter" action="/jobs">
+            {% for field in filter_form %}
+            <div>
+            {{ field.label_tag }}:
+            </div>
+            <div>
+            {{ field }}
+            </div>
+            {% endfor %}
+            <input type="submit" name="submit" value="Apply"/>
+          </form>          
+        </div>
+      </div>
+    </body>
+</html>

@@ -132,44 +132,44 @@ def test_interval ():
 
 
 def jobs_history (pools=None, users=None, statuses=None, cgroup="Time", dt_from=None, dt_to=None):
-    sql = """select ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status,
-c.tag as counter_tag, c.name as counter_name, cv.value
-from counters_taskinstance ti, counters_pool p, counters_user u,
-counters_countervalue cv, counters_counter c, counters_countergroup cg
-where p.id = ti.pool_id and u.id = ti.user_id and cv.taskInstance_id = ti.id and
-c.id = cv.counter_id and cg.id = c.counterGroup_id and cg.name = %s
+    # here we get list of task instances
+    ti_sql = """select ti.id, ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status
+from counters_taskinstance ti, counters_pool p, counters_user u
+where p.id = ti.pool_id and u.id = ti.user_id
 """
     # handle filters
-    sqlargs = [cgroup]
+    ti_sqlargs = []
     if pools:
         conds = ["p.name = %s"] * len (pools)
-        sql += "and (" + " or ".join (conds) + ")"
-        sqlargs += pools
+        ti_sql += "and (" + " or ".join (conds) + ")"
+        ti_sqlargs += pools
     if users:
         conds = ["u.name = %s"] * len (users)
-        sql += "and (" + " or ".join (conds) + ")"
-        sqlargs += users
+        ti_sql += "and (" + " or ".join (conds) + ")"
+        ti_sqlargs += users
     if statuses:
         conds = ["ti.status = %s"] * len (statuses)
-        sql += "and (" + " or ".join (conds) + ")"
-        sqlargs += map (TaskInstance.statusValue, statuses)
+        ti_sql += "and (" + " or ".join (conds) + ")"
+        ti_sqlargs += map (TaskInstance.statusValue, statuses)
     if dt_from:
-        sql += " and ti.started >= %s"
-        sqlargs.append (dt_from)
+        ti_sql += " and ti.started >= %s"
+        ti_sqlargs.append (dt_from)
     if dt_to:
-        sql += " and ti.started <= %s"
-        sqlargs.append (dt_to)
+        ti_sql += " and ti.started <= %s"
+        ti_sqlargs.append (dt_to)
+    ti_sql += " order by ti.jobid"
 
     cur = connection.cursor ()
-    cur.execute (sql, sqlargs)
-    sql += " order by ti.jobid"
+    cur.execute (ti_sql, ti_sqlargs)
 
+    # maps id in jobinstances to result dict
     result = {}
-    tags = set ()
+    ids = []
 
     for entry in cur.fetchall ():
-        jobid, pool_name, user_name, submitted, finished, status, counter_tag, counter_name, value = entry
-        if not jobid in result:
+        recid, jobid, pool_name, user_name, submitted, finished, status = entry
+        ids.append (recid)
+        if not recid in result:
             if finished == None:
                 duration = datetime.datetime.now (timezone.get_current_timezone ()) - submitted
             else:
@@ -183,15 +183,31 @@ c.id = cv.counter_id and cg.id = c.counterGroup_id and cg.name = %s
                 'duration': duration,
                 'status': dict (TaskInstance.STATUSES).get (status),
                 })
-            result[jobid] = cur_result
+            result[recid] = cur_result
 
-        # handle value
-        result[jobid][counter_tag] = value
-        tags.add (counter_tag)
+    # select values of this counter
+    if len (ids) > 0:
+        c_sql = """select cv.taskInstance_id, c.tag, cv.value
+    from counters_countervalue cv, counters_counter c, counters_countergroup cg
+    where cv.taskInstance_id in (%s) and c.id = cv.counter_id and cg.id = c.counterGroup_id
+    """ % ",".join (map (str, ids))
 
-    # if task is missing some value, add it with zero value
-    for v in result.values ():
-        for missing in tags - set (v.keys ()):
-            v[missing] = 0L
+        c_sql += " and cg.name = %s"
+
+        cur = connection.cursor ()
+        print c_sql
+        cur.execute (c_sql, [cgroup])
+
+        tags = set ()
+
+        for recid, tag, value in cur.fetchall ():
+            tags.add (tag)
+            if recid in result:
+                result[recid][tag] = value
+
+        # assign zero value for uninitialized counter values
+        for data in result.values ():
+            for missing in tags - set (data.keys ()):
+                data[missing] = 0L
 
     return result.values ()

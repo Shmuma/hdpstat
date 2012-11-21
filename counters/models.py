@@ -70,6 +70,7 @@ class TaskInstance (models.Model):
         return 0
 
 
+
 class CounterGroup (models.Model):
     name = models.CharField (max_length=100, unique=True)
 

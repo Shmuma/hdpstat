@@ -1,0 +1,11 @@
+#container {
+    position: relative;
+}
+
+#table {
+    float: left;
+}
+
+#filters {
+    float: right;
+}
