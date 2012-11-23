@@ -40,3 +40,4 @@ class FilterForm (forms.Form):
     pool = forms.MultipleChoiceField (required = False, choices = [(p.name, p.name) for p in Pool.objects.order_by ('name')])
     days = forms.ChoiceField (required = False, choices = DAYS_CHOICES, initial=1)
     cgroup = forms.ChoiceField (label = "Counters", required = False, choices = get_counters ())
+    sort = forms.CharField (widget = forms.HiddenInput)
