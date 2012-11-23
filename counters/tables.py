@@ -49,13 +49,13 @@ class LargeNumberColumn (tables.Column):
 
     def render (self, value):
         if self.divider != 0:
-            value /= self.divider
+            value /= float (self.divider)
 
         prev_power = 0
         prev_suffix = ''
         for power in sorted (self.power_to_suffix.keys ()):
             if value < pow (10, power):
-                return "%.2f%s" % (value / pow (10, prev_power), prev_suffix)
+                return "%.2f%s" % (float (value) / pow (10, prev_power), prev_suffix)
             prev_power = power
             prev_suffix = self.power_to_suffix[power]
 
