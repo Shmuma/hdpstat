@@ -1,4 +1,5 @@
 import django_tables2 as tables
+from django_tables2.utils import A
 
 from counters.models import Pool
 
@@ -74,7 +75,8 @@ class JobsTableBase (tables.Table):
     class Meta:
         attrs = {"class": "paleblue"}
 
-    jobid = tables.Column ()
+    jobid = tables.LinkColumn ('job_detail', kwargs={'jobid': A('jobid')})
+#    jobid = tables.Column ()
     status = tables.Column ()
     pool = tables.Column ()
     user = tables.Column ()
@@ -147,3 +149,11 @@ class JobsTable_HBase (JobsTableBase, tables.Table):
     SCAN_BYTES = LargeNumberColumn (verbose_name="Scan bytes")
     SCAN_DISK_BYTES = LargeNumberColumn (verbose_name="Scan HFile bytes")
     SCAN_READ_MS = LargeNumberColumn (verbose_name="Scan HFile sec", divider=1000)
+
+
+class JobDetailTable (tables.Table):
+    class Meta:
+        attrs = {"class": "paleblue"}
+        orderable = False
+    name = tables.Column ()
+    value = tables.Column ()

@@ -8,6 +8,7 @@ urlpatterns = patterns('',
                        url (r'^pools_all_time', 'counters.views.overview_pools_all_time'), 
                        url (r'^pools_interval', 'counters.views.overview_pools_interval'), 
                        url (r'^jobs', 'counters.views.jobs_view'), 
+                       url (r'^job/(?P<jobid>\w+)', 'counters.views.job_detail_view', name='job_detail'),
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),
     # url(r'^hdpstat/', include('hdpstat.foo.urls')),

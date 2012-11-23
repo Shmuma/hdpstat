@@ -210,3 +210,48 @@ where p.id = ti.pool_id and u.id = ti.user_id
                 data[missing] = 0L
 
     return result.values ()
+
+
+def job_detail_data (jobid):
+    res = []
+    ti = TaskInstance.objects.get (jobid=jobid)
+    res.append (('JobID', ti.jobid))
+    res.append (('Name', ti.task.name))
+    res.append (('Group', ti.task.taskGroup.name))
+    res.append (('Pool', ti.pool.name))
+    res.append (('User', ti.user.name))
+    res.append (('Submitted', ti.submitted))
+    res.append (('Started', ti.started))
+    res.append (('Finished', ti.finished))
+    now = datetime.datetime.now (timezone.get_current_timezone ())
+
+    if ti.finished != None:
+        res.append (('Duration', ti.finished-ti.started))
+    else:
+        res.append (('Duration', now-ti.started))
+    res.append (('Status', ti.get_status_display ()))
+
+    res.append (('Mappers', ti.mappers))
+    res.append (('Reducers', ti.reducers))
+
+    res.append (('Mappers started', ti.started_maps))
+    res.append (('Mappers finished', ti.finished_maps))
+    if ti.started_maps == None:
+        res.append (('Mappers duration', None))
+    else:
+        if ti.finished_maps == None:
+            res.append (('Mappers duration', now-ti.started_maps))
+        else:
+            res.append (('Mappers duration', ti.finished_maps-ti.started_maps))
+
+    res.append (('Reducers started', ti.started_reducers))
+    res.append (('Reducers finished', ti.finished_reducers))
+    if ti.started_reducers == None:
+        res.append (('Reducers duration', None))
+    else:
+        if ti.finished_reducers == None:
+            res.append (('Reducers duration', now-ti.started_reducers))
+        else:
+            res.append (('Reducers duration', ti.finished_reducers-ti.started_reducers))
+
+    return [{'name': v[0], 'value': v[1]} for v in res]

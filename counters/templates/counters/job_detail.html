@@ -1,0 +1,16 @@
+{% load render_table from django_tables2 %}
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+        <link rel="stylesheet" href="{{ STATIC_URL }}counters/screen.css" />
+        <title>Details for {{ jobid }}</title>
+    </head>
+    <body>
+      <div id="container">
+        <div id="table">
+          {% render_table table %}
+        </div>
+      </div>
+    </body>
+</html>
