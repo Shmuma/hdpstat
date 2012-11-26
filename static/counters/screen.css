@@ -4,8 +4,20 @@
 
 #table {
     float: left;
+    padding: 10px;
 }
 
 #filters {
     float: right;
+    padding: 10px;
+}
+
+#detail_table {
+    float: left;
+    padding: 10px;
+}
+
+#counters {
+    float: left;
+    padding: 10px;
 }

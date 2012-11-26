@@ -6,8 +6,8 @@ from django.shortcuts import render
 from django_tables2 import RequestConfig, Table
 
 from counters.models import Pool
-from counters.reports import pools_resources_all_time, pools_resources_interval, jobs_history, job_detail_data
-from counters.tables import PoolsResourcesTable, make_jobs_table, JobDetailTable
+from counters.reports import pools_resources_all_time, pools_resources_interval, jobs_history, job_detail_data, job_counters_data
+from counters.tables import PoolsResourcesTable, make_jobs_table, JobDetailTable, JobCountersTable
 
 from counters import filters
 
@@ -59,4 +59,7 @@ def jobs_view (request):
 def job_detail_view (request, jobid):
     data = job_detail_data (jobid)
     table = JobDetailTable (data)
-    return render (request, "counters/job_detail.html", {'jobid': jobid, 'table': table})
+
+    counters_data = job_counters_data (jobid)
+    counters_table = JobCountersTable (counters_data)
+    return render (request, "counters/job_detail.html", {'jobid': jobid, 'table': table, 'counters_table': counters_table})

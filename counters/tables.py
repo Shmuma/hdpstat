@@ -197,3 +197,14 @@ class JobDetailTable (tables.Table):
         orderable = False
     name = tables.Column ()
     value = tables.Column ()
+
+
+class JobCountersTable (tables.Table):
+    class Meta:
+        attrs = {"class": "paleblue"}
+        orderable = False
+
+    group = tables.Column ()
+    name = tables.Column ()
+    value = LargeNumberColumn ()
+    origin_value = tables.Column ()

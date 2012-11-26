@@ -255,3 +255,25 @@ def job_detail_data (jobid):
             res.append (('Reducers duration', ti.finished_reducers-ti.started_reducers))
 
     return [{'name': v[0], 'value': v[1]} for v in res]
+
+
+def job_counters_data (jobid):
+    """
+    Return data with job's counters for detail page rendering
+    """
+    ti = TaskInstance.objects.get (jobid=jobid)
+
+    res = []
+    seen_groups = set ()
+
+    for cv in ti.countervalue_set.order_by ("counter__counterGroup"):
+        group_name = cv.counter.counterGroup.name
+
+        if group_name in seen_groups:
+            group_name = unicode (" ")
+        else:
+            seen_groups.add (group_name)
+
+        res.append ({'group': group_name, 'name': cv.counter.name, 'value': long (cv.value), 'origin_value': long (cv.value)})
+
+    return res
