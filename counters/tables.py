@@ -90,10 +90,20 @@ def make_jobs_table (cgroup, data):
         return JobsTable_Time (data)
     elif cgroup == "TaskIO":
         return JobsTable_TaskIO (data)
-    elif cgroup == "MapRed":
-        return JobsTable_MapRed (data)
-    elif cgroup == "HBase":
-        return JobsTable_HBase (data)
+    elif cgroup == "Mappers":
+        return JobsTable_Mappers (data)
+    elif cgroup == "Reducers":
+        return JobsTable_Reducers (data)
+    elif cgroup == "HBase:Put":
+        return JobsTable_HBasePut (data)
+    elif cgroup == "HBase:Del":
+        return JobsTable_HBaseDel (data)
+    elif cgroup == "HBase:Get":
+        return JobsTable_HBaseGet (data)
+    elif cgroup == "HBase:Scan":
+        return JobsTable_HBaseScan (data)
+    elif cgroup == "HBase:ScanRS":
+        return JobsTable_HBaseScanRS (data)
     return JobsTableBase (data)
 
 
@@ -115,20 +125,26 @@ class JobsTable_TaskIO (JobsTableBase, tables.Table):
     HDFS_BYTES_WRITTEN = LargeNumberColumn (verbose_name="HDFS written")
 
 
-class JobsTable_MapRed (JobsTableBase, tables.Table):
+class JobsTable_Mappers (JobsTableBase, tables.Table):
     class Meta:
         attrs = {"class": "paleblue"}
 
     MAP_INPUT_RECORDS = LargeNumberColumn (verbose_name="Map input records")
     MAP_OUTPUT_RECORDS = LargeNumberColumn (verbose_name="Map output records")
     SPILLED_RECORDS = LargeNumberColumn (verbose_name="Spilled records")
+    MAP_OUTPUT_BYTES = LargeNumberColumn (verbose_name="Map output records")
+
+
+class JobsTable_Reducers (JobsTableBase, tables.Table):
+    class Meta:
+        attrs = {"class": "paleblue"}
+
     REDUCE_INPUT_RECORDS = LargeNumberColumn (verbose_name="Reduce input records")
     REDUCE_OUTPUT_RECORDS = LargeNumberColumn (verbose_name="Reduce output records")
-    MAP_OUTPUT_BYTES = LargeNumberColumn (verbose_name="Map output records")
     REDUCE_SHUFFLE_BYTES = LargeNumberColumn (verbose_name="Reduce shuffle bytes")
 
 
-class JobsTable_HBase (JobsTableBase, tables.Table):
+class JobsTable_HBasePut (JobsTableBase, tables.Table):
     class Meta:
         attrs = {"class": "paleblue"}
 
@@ -136,17 +152,41 @@ class JobsTable_HBase (JobsTableBase, tables.Table):
     PUT_KVS = LargeNumberColumn (verbose_name="Put KVs")
     PUT_BYTES = LargeNumberColumn (verbose_name="Put bytes")
     PUT_MS = LargeNumberColumn (verbose_name="Put seconds", divider=1000)
+
+
+class JobsTable_HBaseDel (JobsTableBase, tables.Table):
+    class Meta:
+        attrs = {"class": "paleblue"}
+
     DELETE_CALLS = LargeNumberColumn (verbose_name="Delete calls")
     DELETE_MS = LargeNumberColumn (verbose_name="Delete sec", divider=1000)
+
+
+class JobsTable_HBaseGet (JobsTableBase, tables.Table):
+    class Meta:
+        attrs = {"class": "paleblue"}
+
     GET_CALLS = LargeNumberColumn (verbose_name="Get calls")
     GET_KVS = LargeNumberColumn (verbose_name="Get KVs")
     GET_BYTES = LargeNumberColumn (verbose_name="Get bytes")
     GET_MS = LargeNumberColumn (verbose_name="Get sec", divider=1000)
+
+
+class JobsTable_HBaseScan (JobsTableBase, tables.Table):
+    class Meta:
+        attrs = {"class": "paleblue"}
+
     SCAN_NEXT_MS = LargeNumberColumn (verbose_name="Scan next sec", divider=1000)
     SCAN_NEXT_COUNT = LargeNumberColumn (verbose_name="Scan next count")
     SCAN_ROWS = LargeNumberColumn (verbose_name="Scan rows")
     SCAN_KVS = LargeNumberColumn (verbose_name="Scan KVs")
     SCAN_BYTES = LargeNumberColumn (verbose_name="Scan bytes")
+
+
+class JobsTable_HBaseScanRS (JobsTableBase, tables.Table):
+    class Meta:
+        attrs = {"class": "paleblue"}
+
     SCAN_DISK_BYTES = LargeNumberColumn (verbose_name="Scan HFile bytes")
     SCAN_READ_MS = LargeNumberColumn (verbose_name="Scan HFile sec", divider=1000)
 

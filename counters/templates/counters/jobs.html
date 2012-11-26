@@ -14,9 +14,11 @@
         <div id="filters">
           <form method="get" id="filter" action="/jobs">
             {% for field in filter_form %}
+            {% if not field.is_hidden %}
             <div>
             {{ field.label_tag }}:
             </div>
+            {% endif %}
             <div>
             {{ field }}
             </div>

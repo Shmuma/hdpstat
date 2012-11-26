@@ -4,10 +4,14 @@ By counter tag (internal name), determine human-readable name and group.
 
 tagsClasses = { "TaskIO": set (["FILE_BYTES_READ", "HDFS_BYTES_READ", "FILE_BYTES_WRITTEN", "HDFS_BYTES_WRITTEN"]),
                 "Time":   set (["MAP_WALL_CLOCK_MS", "SHUFFLE_WALL_CLOCK_MS", "SORT_WALL_CLOCK_MS", "REDUCE_WALL_CLOCK_MS"]),
-                "MapRed": set (["MAP_INPUT_RECORDS", "REDUCE_SHUFFLE_BYTES", "SPILLED_RECORDS", "MAP_OUTPUT_BYTES", "REDUCE_INPUT_RECORDS", "REDUCE_OUTPUT_RECORDS", "MAP_OUTPUT_RECORDS"]),
-                "HBase":  set (["PUT_CALLS", "PUT_KVS", "PUT_BYTES", "PUT_MS", "DELETE_CALLS", "DELETE_MS", "GET_CALLS", "GET_KVS", "GET_BYTES", "GET_MS",
-                               "SCAN_NEXT_MS", "SCAN_NEXT_COUNT", "SCAN_ROWS", "SCAN_KVS", "SCAN_BYTES", "SCAN_DISK_BYTES", "SCAN_READ_MS"])
-}
+                "Mappers": set (["MAP_INPUT_RECORDS", "SPILLED_RECORDS", "MAP_OUTPUT_BYTES", "MAP_OUTPUT_RECORDS"]),
+                "Reducers": set (["REDUCE_SHUFFLE_BYTES", "REDUCE_INPUT_RECORDS", "REDUCE_OUTPUT_RECORDS"]),
+                "HBase:Put": set (["PUT_CALLS", "PUT_KVS", "PUT_BYTES", "PUT_MS"]),
+                "HBase:Del": set (["DELETE_CALLS", "DELETE_MS"]),
+                "HBase:Get": set (["GET_CALLS", "GET_KVS", "GET_BYTES", "GET_MS"]),
+                "HBase:Scan": set (["SCAN_NEXT_MS", "SCAN_NEXT_COUNT", "SCAN_ROWS", "SCAN_KVS", "SCAN_BYTES"]),
+                "HBase:ScanRS": set (["SCAN_DISK_BYTES", "SCAN_READ_MS"]),
+                }
 
 
 tagsNames = { "FILE_BYTES_READ": "Local data read, bytes",
