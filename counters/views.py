@@ -42,12 +42,13 @@ def jobs_view (request):
     statuses = request.GET.getlist ("status")
     cgroup = request.GET.get ("cgroup", "Time")
     back_days = int (request.GET.get ("days", 1))
+    job_name = request.GET.get ("job_name", "")
 
     filter_form = filters.FilterForm (request.GET)
 
     dt_from = datetime.datetime.now (timezone.get_current_timezone ()) - datetime.timedelta (days=back_days)
 
-    data = jobs_history (pools=pools, users=users, statuses=statuses, cgroup=cgroup, dt_from=dt_from)
+    data = jobs_history (pools=pools, users=users, statuses=statuses, cgroup=cgroup, dt_from=dt_from, job_name=job_name)
     table = make_jobs_table (cgroup, data)
 
     RequestConfig (request, paginate=True).configure (table)

@@ -39,5 +39,6 @@ class FilterForm (forms.Form):
     user = forms.MultipleChoiceField (required = False, choices = [(u.name, u.name) for u in User.objects.order_by ('name')])
     pool = forms.MultipleChoiceField (required = False, choices = [(p.name, p.name) for p in Pool.objects.order_by ('name')])
     days = forms.ChoiceField (required = False, choices = DAYS_CHOICES, initial=1)
-    cgroup = forms.ChoiceField (label = "Counters", required = False, choices = get_counters ())
+    job_name = forms.CharField (label = "Job", required = False)
+    cgroup = forms.ChoiceField (label = "Show counters", required = False, choices = get_counters ())
     sort = forms.CharField (widget = forms.HiddenInput)

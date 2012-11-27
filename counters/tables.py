@@ -129,19 +129,19 @@ class JobsTable_Mappers (JobsTableBase, tables.Table):
     class Meta:
         attrs = {"class": "paleblue"}
 
-    MAP_INPUT_RECORDS = LargeNumberColumn (verbose_name="Map input records")
-    MAP_OUTPUT_RECORDS = LargeNumberColumn (verbose_name="Map output records")
+    MAP_INPUT_RECORDS = LargeNumberColumn (verbose_name="Map in records")
+    MAP_OUTPUT_RECORDS = LargeNumberColumn (verbose_name="Map out records")
     SPILLED_RECORDS = LargeNumberColumn (verbose_name="Spilled records")
-    MAP_OUTPUT_BYTES = LargeNumberColumn (verbose_name="Map output records")
+    MAP_OUTPUT_BYTES = LargeNumberColumn (verbose_name="Map out records")
 
 
 class JobsTable_Reducers (JobsTableBase, tables.Table):
     class Meta:
         attrs = {"class": "paleblue"}
 
-    REDUCE_INPUT_RECORDS = LargeNumberColumn (verbose_name="Reduce input records")
-    REDUCE_OUTPUT_RECORDS = LargeNumberColumn (verbose_name="Reduce output records")
-    REDUCE_SHUFFLE_BYTES = LargeNumberColumn (verbose_name="Reduce shuffle bytes")
+    REDUCE_INPUT_RECORDS = LargeNumberColumn (verbose_name="Reduce in records")
+    REDUCE_OUTPUT_RECORDS = LargeNumberColumn (verbose_name="Reduce out records")
+    REDUCE_SHUFFLE_BYTES = LargeNumberColumn (verbose_name="Shuffle bytes")
 
 
 class JobsTable_HBasePut (JobsTableBase, tables.Table):

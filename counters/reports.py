@@ -131,16 +131,17 @@ def test_interval ():
     return report
 
 
-def jobs_history (pools=None, users=None, statuses=None, cgroup="Time", dt_from=None, dt_to=None):
+def jobs_history (pools=None, users=None, statuses=None, cgroup="Time",
+                  dt_from=None, dt_to=None, job_name=""):
     # build list with counter group tags
     default_tags = {}
     for counter in CounterGroup.objects.get (name=cgroup).counter_set.all ():
-        default_tags[counter.tag] = ""
+        default_tags[counter.tag] = 0L
 
     # here we get list of task instances
     ti_sql = """select ti.id, ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status
-from counters_taskinstance ti, counters_pool p, counters_user u
-where p.id = ti.pool_id and u.id = ti.user_id
+from counters_taskinstance ti, counters_pool p, counters_user u, counters_task t
+where p.id = ti.pool_id and u.id = ti.user_id and t.id = ti.task_id
 """
     # handle filters
     ti_sqlargs = []
@@ -162,8 +163,10 @@ where p.id = ti.pool_id and u.id = ti.user_id
     if dt_to:
         ti_sql += " and ti.started <= %s"
         ti_sqlargs.append (dt_to)
+    if len (job_name) > 0:
+        ti_sql += " and t.name like %s"
+        ti_sqlargs.append ("%"+job_name+"%")
     ti_sql += " order by ti.jobid"
-
     cur = connection.cursor ()
     cur.execute (ti_sql, ti_sqlargs)
 
