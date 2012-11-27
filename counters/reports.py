@@ -5,7 +5,7 @@ import time
 from django.utils import timezone
 from django.db import connection
 
-from models import TaskInstance, CounterValue, Counter
+from models import TaskInstance, CounterValue, Counter, CounterGroup
 
 
 def get_resource_counter_ids ():
@@ -132,6 +132,11 @@ def test_interval ():
 
 
 def jobs_history (pools=None, users=None, statuses=None, cgroup="Time", dt_from=None, dt_to=None):
+    # build list with counter group tags
+    default_tags = {}
+    for counter in CounterGroup.objects.get (name=cgroup).counter_set.all ():
+        default_tags[counter.tag] = ""
+
     # here we get list of task instances
     ti_sql = """select ti.id, ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status
 from counters_taskinstance ti, counters_pool p, counters_user u
@@ -183,6 +188,7 @@ where p.id = ti.pool_id and u.id = ti.user_id
                 'duration': duration,
                 'status': dict (TaskInstance.STATUSES).get (status),
                 })
+            cur_result.update (default_tags)
             result[recid] = cur_result
 
     # select values of this counter
@@ -197,18 +203,9 @@ where p.id = ti.pool_id and u.id = ti.user_id
         cur = connection.cursor ()
         cur.execute (c_sql, [cgroup])
 
-        tags = set ()
-
         for recid, tag, value in cur.fetchall ():
-            tags.add (tag)
             if recid in result:
                 result[recid][tag] = value
-
-        # assign zero value for uninitialized counter values
-        for data in result.values ():
-            for missing in tags - set (data.keys ()):
-                data[missing] = 0L
-
     return result.values ()
 
 
@@ -274,6 +271,7 @@ def job_counters_data (jobid):
         else:
             seen_groups.add (group_name)
 
-        res.append ({'group': group_name, 'name': cv.counter.name, 'value': long (cv.value), 'origin_value': long (cv.value)})
+        res.append ({'group': group_name, 'name': cv.counter.name, 'value': long (cv.value),
+                     'origin_value': long (cv.value)})
 
     return res
