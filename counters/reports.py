@@ -266,7 +266,7 @@ def job_counters_data (jobid):
     res = []
     seen_groups = set ()
 
-    for cv in ti.countervalue_set.order_by ("counter__counterGroup"):
+    for cv in ti.countervalue_set.order_by ("counter__counterGroup", "counter__tag"):
         group_name = cv.counter.counterGroup.name
 
         if group_name in seen_groups:
