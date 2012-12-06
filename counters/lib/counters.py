@@ -3,9 +3,9 @@ By counter tag (internal name), determine human-readable name and group.
 """
 
 tagsClasses = { "TaskIO": set (["FILE_BYTES_READ", "HDFS_BYTES_READ", "FILE_BYTES_WRITTEN", "HDFS_BYTES_WRITTEN"]),
-                "Time":   set (["MAP_WALL_CLOCK_MS", "SHUFFLE_WALL_CLOCK_MS", "SORT_WALL_CLOCK_MS", "REDUCE_WALL_CLOCK_MS"]),
-                "Mappers": set (["MAP_INPUT_RECORDS", "SPILLED_RECORDS", "MAP_OUTPUT_BYTES", "MAP_OUTPUT_RECORDS"]),
-                "Reducers": set (["REDUCE_SHUFFLE_BYTES", "REDUCE_INPUT_RECORDS", "REDUCE_OUTPUT_RECORDS"]),
+                "Time":   set (["MAP_WALL_CLOCK_MS", "REDUCE_WALL_CLOCK_MS", "SLOTS_MILLIS_MAPS", "SLOTS_MILLIS_REDUCES"]),
+                "Mappers": set (["MAP_INPUT_RECORDS", "SPILLED_RECORDS", "MAP_OUTPUT_BYTES", "MAP_OUTPUT_RECORDS", "TOTAL_LAUNCHED_MAPS", "NUM_FAILED_MAPS"]),
+                "Reducers": set (["REDUCE_SHUFFLE_BYTES", "REDUCE_INPUT_RECORDS", "REDUCE_OUTPUT_RECORDS", "TOTAL_LAUNCHED_REDUCES", "NUM_FAILED_REDUCES"]),
                 "HBase:Put": set (["PUT_CALLS", "PUT_KVS", "PUT_BYTES", "PUT_MS"]),
                 "HBase:Del": set (["DELETE_CALLS", "DELETE_MS"]),
                 "HBase:Get": set (["GET_CALLS", "GET_KVS", "GET_BYTES", "GET_MS"]),
@@ -23,6 +23,13 @@ tagsNames = { "FILE_BYTES_READ": "Local data read, bytes",
               "SHUFFLE_WALL_CLOCK_MS": "Shuffle wall clock (ms)",
               "SORT_WALL_CLOCK_MS": "Sort wall clock (ms)",
               "REDUCE_WALL_CLOCK_MS": "Reduce wall clock (ms)",
+              "SLOTS_MILLIS_MAPS": "Total mappers slots time (ms)",
+              "SLOTS_MILLIS_REDUCES": "Total reducers slots time (ms)",
+
+              "TOTAL_LAUNCHED_MAPS": "Launcher maps",
+              "NUM_FAILED_MAPS": "Failed maps",
+              "TOTAL_LAUNCHED_REDUCES": "Launched reducers",
+              "NUM_FAILED_REDUCES": "Failed reducers",
 
               "PUT_CALLS": "Put count",
               "PUT_KVS": "Put KVs",

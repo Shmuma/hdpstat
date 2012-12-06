@@ -36,8 +36,8 @@ class FilterForm (forms.Form):
 
     status = forms.MultipleChoiceField (required = False, choices = get_statuses (),
                                         widget = forms.CheckboxSelectMultiple)
-    user = forms.MultipleChoiceField (required = False, choices = [(u.name, u.name) for u in User.objects.order_by ('name')])
-    pool = forms.MultipleChoiceField (required = False, choices = [(p.name, p.name) for p in Pool.objects.order_by ('name')])
+    user = forms.ModelMultipleChoiceField (required = False, queryset = User.objects.order_by ('name'))
+    pool = forms.ModelMultipleChoiceField (required = False, queryset = Pool.objects.order_by ('name'))
     days = forms.ChoiceField (required = False, choices = DAYS_CHOICES, initial=1)
     job_name = forms.CharField (label = "Job", required = False)
     cgroup = forms.ChoiceField (label = "Show counters", required = False, choices = get_counters ())
