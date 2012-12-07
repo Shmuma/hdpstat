@@ -21,3 +21,12 @@
     float: left;
     padding: 10px;
 }
+
+#menu {
+    padding: 10px;
+}
+
+.menuitems {
+    margin-bottom: 0;
+    font-size: 80%;
+}

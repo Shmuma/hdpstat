@@ -64,3 +64,7 @@ def job_detail_view (request, jobid):
     counters_data = job_counters_data (jobid)
     counters_table = JobCountersTable (counters_data)
     return render (request, "counters/job_detail.html", {'jobid': jobid, 'table': table, 'counters_table': counters_table})
+
+
+def dashboard_view (request):
+    return render (request, "counters/dashboard.html")

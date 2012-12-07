@@ -5,6 +5,7 @@ from django.conf.urls import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
+                       url (r'^$', 'counters.views.dashboard_view'),
                        url (r'^pools_all_time', 'counters.views.overview_pools_all_time'), 
                        url (r'^pools_interval', 'counters.views.overview_pools_interval'), 
                        url (r'^jobs', 'counters.views.jobs_view'), 

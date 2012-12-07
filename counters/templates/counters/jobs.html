@@ -7,6 +7,9 @@
         <title>{{ title }}</title>
     </head>
     <body>
+      <div class="menu-outer">
+        {% include "counters/menu.html" %}       
+      </div>
       <div id="container">
         <div id="table">
           {% render_table table %}
