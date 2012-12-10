@@ -6,10 +6,13 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
                        url (r'^$', 'counters.views.dashboard_view'),
-                       url (r'^pools_all_time', 'counters.views.overview_pools_all_time'), 
-                       url (r'^pools_interval', 'counters.views.overview_pools_interval'), 
+#                       url (r'^pools_all_time', 'counters.views.overview_pools_all_time'), 
+#                       url (r'^pools_interval', 'counters.views.overview_pools_interval'), 
                        url (r'^jobs', 'counters.views.jobs_view'), 
                        url (r'^job/(?P<jobid>\w+)', 'counters.views.job_detail_view', name='job_detail'),
+                       url (r'^aggregate_pools', 'counters.views.not_implemented'),
+                       url (r'^aggregate_users', 'counters.views.not_implemented'),
+                       url (r'^aggregate_groups', 'counters.views.not_implemented'),
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),
     # url(r'^hdpstat/', include('hdpstat.foo.urls')),
