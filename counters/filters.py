@@ -1,6 +1,6 @@
 from django import forms
 
-from counters.models import TaskInstance, User, Pool, CounterGroup
+from counters.models import TaskInstance, User, Pool, CounterGroup, TaskGroup
 
 
 def get_statuses ():
@@ -38,7 +38,8 @@ class FilterForm (forms.Form):
                                         widget = forms.CheckboxSelectMultiple)
     user = forms.ModelMultipleChoiceField (required = False, queryset = User.objects.order_by ('name'))
     pool = forms.ModelMultipleChoiceField (required = False, queryset = Pool.objects.order_by ('name'))
+    job_name = forms.CharField (label = "Job name", required = False)
+    task_group = forms.ModelMultipleChoiceField (label = "Group", required = False, queryset = TaskGroup.objects.order_by ('name'))
     days = forms.ChoiceField (required = False, choices = DAYS_CHOICES, initial=1)
-    job_name = forms.CharField (label = "Job", required = False)
     cgroup = forms.ChoiceField (label = "Show counters", required = False, choices = get_counters ())
     sort = forms.CharField (widget = forms.HiddenInput)

@@ -132,25 +132,25 @@ def test_interval ():
 
 
 def jobs_history (pools=None, users=None, statuses=None, cgroup="Time",
-                  dt_from=None, dt_to=None, job_name=""):
+                  dt_from=None, dt_to=None, job_name="", task_groups=None):
     # build list with counter group tags
     default_tags = {}
     for counter in CounterGroup.objects.get (name=cgroup).counter_set.all ():
         default_tags[counter.tag] = 0L
 
     # here we get list of task instances
-    ti_sql = """select ti.id, ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status
-from counters_taskinstance ti, counters_pool p, counters_user u, counters_task t
-where p.id = ti.pool_id and u.id = ti.user_id and t.id = ti.task_id
+    ti_sql = """select ti.id, ti.jobid, p.name, u.name, ti.submitted, ti.finished, ti.status, t.name, tg.name
+from counters_taskinstance ti, counters_pool p, counters_user u, counters_task t, counters_taskgroup tg
+where p.id = ti.pool_id and u.id = ti.user_id and t.id = ti.task_id and t.taskGroup_id = tg.id
 """
     # handle filters
     ti_sqlargs = []
     if pools:
-        conds = ["p.name = %s"] * len (pools)
+        conds = ["p.id = %s"] * len (pools)
         ti_sql += "and (" + " or ".join (conds) + ")"
         ti_sqlargs += pools
     if users:
-        conds = ["u.name = %s"] * len (users)
+        conds = ["u.id = %s"] * len (users)
         ti_sql += "and (" + " or ".join (conds) + ")"
         ti_sqlargs += users
     if statuses:
@@ -166,6 +166,11 @@ where p.id = ti.pool_id and u.id = ti.user_id and t.id = ti.task_id
     if len (job_name) > 0:
         ti_sql += " and t.name like %s"
         ti_sqlargs.append ("%"+job_name+"%")
+    if task_groups:
+        conds = ["tg.id = %s"] * len (task_groups)
+        ti_sql += "and (" + " or ".join (conds) + ")"
+        ti_sqlargs += task_groups
+    
     ti_sql += " order by ti.jobid"
     cur = connection.cursor ()
     cur.execute (ti_sql, ti_sqlargs)
@@ -175,7 +180,7 @@ where p.id = ti.pool_id and u.id = ti.user_id and t.id = ti.task_id
     ids = []
 
     for entry in cur.fetchall ():
-        recid, jobid, pool_name, user_name, submitted, finished, status = entry
+        recid, jobid, pool_name, user_name, submitted, finished, status, task_name, group = entry
         ids.append (recid)
         if not recid in result:
             if finished == None:
@@ -185,6 +190,8 @@ where p.id = ti.pool_id and u.id = ti.user_id and t.id = ti.task_id
 
             cur_result = dict ({
                 'jobid': jobid,
+                'task_name': task_name,
+                'group': group,
                 'pool': pool_name,
                 'user': user_name,
                 'submitted': submitted,

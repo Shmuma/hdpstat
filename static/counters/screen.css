@@ -5,11 +5,13 @@
 #table {
     float: left;
     padding: 10px;
+    padding-right: 20px;
 }
 
 #filters {
-    float: right;
     padding: 10px;
+    white-space: nowrap;
+    font-size: 80%;
 }
 
 #detail_table {

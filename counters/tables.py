@@ -76,7 +76,7 @@ class JobsTableBase (tables.Table):
         attrs = {"class": "paleblue"}
 
     jobid = tables.LinkColumn ('job_detail', kwargs={'jobid': A('jobid')})
-#    jobid = tables.Column ()
+    group = tables.TemplateColumn ('<a title="{{ record.task_name }}">{{ value }}</a>')
     status = tables.Column ()
     pool = tables.Column ()
     user = tables.Column ()
