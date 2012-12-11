@@ -9,6 +9,7 @@
 }
 
 #filters {
+    float: left;
     padding: 10px;
     white-space: nowrap;
     font-size: 80%;

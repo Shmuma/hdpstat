@@ -69,7 +69,7 @@ def job_detail_view (request, jobid):
 
 def dashboard_view (request):
 #    return render (request, "counters/dashboard.html")
-    return redirect ('/jobs')
+    return not_implemented (request)
 
 
 def not_implemented (request):
