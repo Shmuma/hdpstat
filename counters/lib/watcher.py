@@ -123,9 +123,12 @@ class HadoopWatcher (object):
                     untouched.discard (xml_name)
                     if not xml_name in entries:
                         # new job entry, create it
-                        je = JobEntry (counter_name, xml_name)
-                        fresh.append (je)
-                        entries[xml_name] = je
+                        try:
+                            je = JobEntry (counter_name, xml_name)
+                            fresh.append (je)
+                            entries[xml_name] = je
+                        except OSError:
+                            pass
                     else:
                         # job entry exists, check for update
                         je = entries[xml_name]
