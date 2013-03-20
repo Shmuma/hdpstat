@@ -7,7 +7,7 @@ import sys
 import netrc
 import os
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 
 class Command (BaseCommand):
@@ -19,14 +19,14 @@ class Command (BaseCommand):
         auths = nrc.authenticators (self.host)
 
         if auths == None:
-            print "No authentication for host '%s'" % self.host
+            raise CommandError ("No authentication for host '%s'" % self.host)
 
         imap = imaplib.IMAP4_SSL (self.host)
 
         try:
             imap.login (auths[0], auths[2])
             imap.select ('Hadoop', False)
-            typ, data = imap.search (None, 'ALL')
+            typ, data = imap.search (None, 'Unseen') # All for all messages
             for num in data[0].split ():
                 typ, data = imap.fetch (num, '(RFC822)')
                 print num
@@ -35,4 +35,4 @@ class Command (BaseCommand):
             imap.close ()
             imap.logout ()
         except imap.error as e:
-            print "Error: %s"  % e
+            raise CommandError ("Error: %s"  % e)

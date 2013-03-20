@@ -27,12 +27,12 @@ class TableSample (models.Model):
     size = models.BigIntegerField ()
     regionSizeAvg = models.FloatField ()
     regions = models.PositiveIntegerField ()
-    splits = models.PositiveIntegerField ()
+    splits = models.PositiveIntegerField (null=True)
 
-    oldestHFile = models.DateTimeField ()
-    hfileCountMax = models.PositiveIntegerField ()
-    hfileCountAvg = models.FloatField ()
-    hfileCount = models.PositiveIntegerField ()
+    oldestHFile = models.DateTimeField (null=True)
+    hfileCountMax = models.PositiveIntegerField (null=True)
+    hfileCountAvg = models.FloatField (null=True)
+    hfileCount = models.PositiveIntegerField (null=True)
 
 
 class CFSample (models.Model):
@@ -40,7 +40,7 @@ class CFSample (models.Model):
     sample = models.ForeignKey (Sample)
 
     size = models.BigIntegerField ()
-    hfileCountMax = models.PositiveIntegerField ()
-    hfileCountAvg = models.FloatField ()
-    hfileCount = models.PositiveIntegerField ()
+    hfileCountMax = models.PositiveIntegerField (null=True)
+    hfileCountAvg = models.FloatField (null=True)
+    hfileCount = models.PositiveIntegerField (null=True)
     
