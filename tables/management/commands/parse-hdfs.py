@@ -5,6 +5,7 @@ Parse listing of HBase root in HDFS
 import re
 import sys
 import datetime
+import subprocess
 
 from django.core.management.base import BaseCommand
 from django.utils.timezone import utc
@@ -106,10 +107,11 @@ class TableData (object):
 
 class Command (BaseCommand):
     def handle (self, *args, **options):
+        data = self._get_data (args)
         tables = {}
         dt = datetime.datetime.now ().replace (tzinfo=utc)
 
-        for l in sys.stdin:
+        for l in data:
             l = l.strip ()
             vals = self._parse_line (l)
             if vals == None:
@@ -125,6 +127,29 @@ class Command (BaseCommand):
 
         for t in tables.values ():
             t.dump (dt)
+
+
+    def _get_data (self, args):
+        if len (args) == 0:
+            # run 'hadoop dfs -lsr /hbase' command and fetch it's output
+            try:
+                p = subprocess.Popen (["hadoop", "dfs", "-lsr", "/hbase"], stdout=subprocess.PIPE)
+                stdout, stderr = p.communicate ()
+                if p.returncode == 0:
+                    return stdout.split ('\n')
+            except OSError as e:
+                print "Error %s" % e
+            return []
+        elif len (args) == 1:
+            if args[0] == "-":
+                data = sys.stdin.readlines ()
+            else:
+                with open (args[0]) as fd:
+                    data = fd.readlines ()
+            return data
+        else:
+            print "Usage: parse-hdfs.py [ - | hbase-listing.txt ]"
+            return []
 
 
     def _parse_line (self, l):
