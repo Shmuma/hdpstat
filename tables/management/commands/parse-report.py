@@ -44,7 +44,6 @@ class Command (BaseCommand):
             "Average reg size:": ("regAvgSize", self._parse_size),
             "Total table size:": ("tableSize", self._parse_size),
             "Amount of regions:": ("regions", self._parse_int),
-            "Spliting regions:": ("splits", self._parse_int)
             }
 
         # parser state
@@ -74,7 +73,9 @@ class Command (BaseCommand):
                         m = re.search ("^(\w+)\s+(.*)$", l)
                         if m:
                             cf = m.group (1)
-                            dat['cfs'][cf] = {'size': self._parse_size (m.group (2))}
+                            avgSize = self._parse_size (m.group (2))
+                            dat['cfs'][cf] = {'size': avgSize * dat['regions'], 
+                                              'avgSize': avgSize}
 
                 if l == "CFs files statistics:":
                     in_cfs2 = True
@@ -109,8 +110,7 @@ class Command (BaseCommand):
         tableSample = models.TableSample (table=table, sample=sample,
                                           size=dat['tableSize'],
                                           regionSizeAvg=dat['regAvgSize'],
-                                          regions=dat['regions'],
-                                          splits=dat.get ('splits'))
+                                          regions=dat['regions'])
         tableSample.save ()
         
         # CFs
@@ -124,6 +124,7 @@ class Command (BaseCommand):
 
             cfsample = models.CFSample (cf=cf, sample=sample,
                                         size=cf_data['size'],
+                                        avgSize=cf_data['avgSize'],
                                         hfileCountMax=cf_data.get ('filesMax'),
                                         hfileCountAvg=cf_data.get ('filesAvg'))
             cfsample.save ()
