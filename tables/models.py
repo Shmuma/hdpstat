@@ -28,7 +28,7 @@ class TableSample (models.Model):
     regionSizeAvg = models.FloatField ()
     regions = models.PositiveIntegerField ()
 
-    oldestHFile = models.DateTimeField (null=True)
+    oldestHFile = models.DateField (null=True)
     hfileCountMax = models.PositiveIntegerField (null=True)
     hfileCountAvg = models.FloatField (null=True)
     hfileCount = models.PositiveIntegerField (null=True)

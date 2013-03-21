@@ -57,29 +57,57 @@ class TableData (object):
         self.reg_hfiles[regname] = self.reg_hfiles.get (regname, 0)
 
 
-    def dump (self):
-#        table, created = models.Table.objects.get_or_create (name=dat['table'])
-#        sample, created = models.Sample.objects.get_or_create (date=dat['date'])
+    def dump (self, dt):
+        table, created = models.Table.objects.get_or_create (name=self.name)
+        sample, created = models.Sample.objects.get_or_create (date=dt)
+
+        # wipe all samples for this table
+        samples = models.TableSample.objects.filter (table=table, sample=sample)
+        if samples.count () > 0:
+            samples.delete ()
 
         regions = len (self.reg_size.keys ())
         avg = sum (self.reg_size.values ()) / float (regions)
-        print "Name = %s, size = %d, regs = %d, avg_reg = %.2f, oldest = %s" % (self.name, self.size,
-                                                                                regions, avg, self.oldest)
+
         sum_hfiles = sum (self.reg_hfiles.values ())
         avg_hfiles = sum_hfiles / float (regions)
-        print "HFiles = %d, MaxHFiles = %d, AvgHFiles = %.2f" % (sum_hfiles, max (self.reg_hfiles.values ()), avg_hfiles)
+        max_hfiles = max (self.reg_hfiles.values ())
 
-        for cf in self.cf_size.keys ():
-            regions = len (self.cf_hfiles[cf].values ())
-            sum_hfiles = sum (self.cf_hfiles[cf].values ())
+        tableSample = models.TableSample (table=table, sample=sample,
+                                          size=self.size,
+                                          regionSizeAvg=avg,
+                                          regions=regions,
+                                          oldestHFile=self.oldest,
+                                          hfileCountMax=max_hfiles,
+                                          hfileCountAvg=avg_hfiles,
+                                          hfileCount=sum_hfiles)
+        tableSample.save ()
+
+        for cf_name in self.cf_size.keys ():
+            cf, created = models.CF.objects.get_or_create (table=table, name=cf_name)
+            
+            samples = models.CFSample.objects.filter (cf=cf, sample=sample)
+            if samples.count () > 0:
+                samples.delete ()
+
+            regions = len (self.cf_hfiles[cf_name].values ())
+            sum_hfiles = sum (self.cf_hfiles[cf_name].values ())
             avg_hfiles = sum_hfiles / float (regions)
-            print "%s size=%d, avgSize=%.2f, HFiles=%d, MaxHFiles = %d, AvgHFiles = %.2f" % (
-                cf, self.cf_size[cf], self.cf_size[cf] / float (regions), sum_hfiles,
-                max (self.cf_hfiles[cf].values ()), avg_hfiles)
+            max_hfiles = max (self.cf_hfiles[cf_name].values ())
+
+            cfsample = models.CFSample (cf=cf, sample=sample,
+                                        size=self.cf_size[cf_name],
+                                        avgSize=self.cf_size[cf_name] / float (regions),
+                                        hfileCountMax=max_hfiles,
+                                        hfileCountAvg=avg_hfiles,
+                                        hfileCount=sum_hfiles)
+            cfsample.save ()
+
 
 class Command (BaseCommand):
     def handle (self, *args, **options):
         tables = {}
+        dt = datetime.datetime.now ().replace (tzinfo=utc)
 
         for l in sys.stdin:
             l = l.strip ()
@@ -96,7 +124,7 @@ class Command (BaseCommand):
                 tables[tname].hfile (vals)
 
         for t in tables.values ():
-            t.dump ()
+            t.dump (dt)
 
 
     def _parse_line (self, l):
