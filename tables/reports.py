@@ -11,8 +11,29 @@ def get_table_sample (name, before):
     if s.oldestHFile == None:
         hfileAge = None
     else:
-        hfileAge = before - datetime.datetime.combine (s.oldestHFile, datetime.time ()).replace (tzinfo=utc)
+        hfileAge = dt_minus_date (before, s.oldestHFile)
 
     data = {'name': s.table.name, 'size': s.size, 'regions': s.regions,
-            'avgreg': s.regionSizeAvg, 'hfiles': s.hfileCount, 'hfileAge': hfileAge}
+            'avgreg': s.regionSizeAvg, 'hfiles': s.hfileCount, 'hfileAge': hfileAge,
+            'sample_id': s.pk}
     return data, s.sample.date
+
+
+
+def dt_minus_date (dt, date):
+    """
+    Returns timedelta between datetitme and date
+    """
+    return dt - datetime.datetime.combine (date, datetime.time ()).replace (tzinfo=utc)
+
+
+def get_cf_data (tsample):
+    res = []
+    for cfs in models.CFSample.objects.filter (sample=tsample.sample, cf__table=tsample.table).order_by ('cf__name'):
+        res.append ({'name': cfs.cf.name,
+                     'size': cfs.size,
+                     'avgSize': cfs.avgSize,
+                     'hfiles': cfs.hfileCount,
+                     'hfilesAvg': cfs.hfileCountAvg,
+                     'hfilesMax': cfs.hfileCountMax})
+    return res

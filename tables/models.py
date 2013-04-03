@@ -47,4 +47,6 @@ class CFSample (models.Model):
     hfileCountMax = models.PositiveIntegerField (null=True)
     hfileCountAvg = models.FloatField (null=True)
     hfileCount = models.PositiveIntegerField (null=True)
-    
+
+    def __unicode__ (self):
+        return "cf=%s, sampled=%s" % (self.cf.name, str (self.sample.date))

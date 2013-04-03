@@ -7,9 +7,16 @@
         <title>{{ title }}</title>
     </head>
     <body>
-      <h3>Tables @ {{ sample_date }} </h3>
-      <div id="table">
-        {% render_table table %}
-      </div>
+      <h3>{{ name }} @ {{ sample }} </h3>
+      <p>
+        <div id="table">
+          {% render_table table %}
+        </div>
+      </p>
+      <p>
+        <div id="table">
+          {% render_table cf_table %}
+        </div>
+      </p>
     </body>
 </html>
