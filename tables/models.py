@@ -17,7 +17,7 @@ class Sample (models.Model):
     date = models.DateTimeField (unique=True)
 
     def __unicode__ (self):
-        return self.date
+        return unicode (self.date)
 
 
 class TableSample (models.Model):
@@ -32,6 +32,10 @@ class TableSample (models.Model):
     hfileCountMax = models.PositiveIntegerField (null=True)
     hfileCountAvg = models.FloatField (null=True)
     hfileCount = models.PositiveIntegerField (null=True)
+
+    def __unicode__ (self):
+        return "table=%s, sampled=%s" % (self.table.name, str (self.sample.date))
+
 
 
 class CFSample (models.Model):
