@@ -4,10 +4,24 @@
     <head>
         <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
         <link rel="stylesheet" href="{{ STATIC_URL }}counters/screen.css" />
-        <title>CF details of {{table_name}}/{{cf_name}}</title>
+        <title>CF details of {{table_name}}/{{cf_name}} @ {{ sample_date }}</title>
     </head>
     <body>
-      <h3>CF details of {{ table_name }}/{{ cf_name }} @ {{ sample }} </h3>
+      <h3>CF details of {{ table_name }}/{{ cf_name }} @ {{ sample_date }} </h3>
+
+      <p>
+      {% if prev_day %}
+      <a href="{% url cf_detail sample=prev_day.id table=table_name cf=cf_name %}">
+        {{prev_day.sample.date.date}}
+      </a>
+      {% endif %}
+
+      {% if next_day %}
+      <a href="{% url cf_detail sample=next_day.id table=table_name cf=cf_name %}">
+        {{next_day.sample.date.date}}</a>
+      {% endif %}
+      </p>
+
       <p>
         <div id="table">
           {% render_table table %}

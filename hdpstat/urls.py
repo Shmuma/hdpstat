@@ -15,6 +15,7 @@ urlpatterns = patterns('',
                        url (r'^aggregate_groups', 'counters.views.not_implemented'),
                        
                        url (r'hbase$', 'tables.views.dashboard_view'),
+                       url (r'hbase/(?P<sample>\d+)$', 'tables.views.dashboard_view', name="tables"),
                        url (r'hbase/(?P<table>\w+)/(?P<sample>\d+)$', 'tables.views.table_detail_view', name='table_detail'),
                        url (r'hbase/(?P<table>\w+)$', 'tables.views.table_detail_view'),
 

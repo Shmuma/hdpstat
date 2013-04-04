@@ -8,6 +8,17 @@
     </head>
     <body>
       <h3>Tables @ {{ sample_date }} </h3>
+
+      <p>
+      {% if prev_day %}
+      <a href="{% url tables sample=prev_day.id %}">{{prev_day.date.date}}</a>
+      {% endif %}
+
+      {% if next_day %}
+      <a href="{% url tables sample=next_day.id %}">{{next_day.date.date}}</a>
+      {% endif %}
+      </p>
+
       <div id="table">
         {% render_table table %}
       </div>

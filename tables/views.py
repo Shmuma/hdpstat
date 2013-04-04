@@ -12,13 +12,19 @@ from django_tables2 import RequestConfig
 import datetime
 
 
-def dashboard_view (request):
+def dashboard_view (request, sample=None):
     """
     Index view of hbase tables
     """
+    if sample == None:
+        now = timezone.now ()
+    else:
+        now = models.Sample.objects.get (id=sample).date
+
+    navigation = reports.get_navigations (now)
+
     # do not show tables with data older than that
     table_expire_days = 14
-    now = timezone.now ()
 
     # get tables with data
     max_dt = None
@@ -26,6 +32,8 @@ def dashboard_view (request):
     for table in models.Table.objects.all ().order_by ("name"):
         # get latests table sample
         data, s_dt = reports.get_table_sample (name=table.name, before=now)
+        if data == None:
+            continue
         if now - s_dt < datetime.timedelta (days=table_expire_days):
             tables_data.append (data)
             if max_dt == None or max_dt < s_dt:
@@ -35,7 +43,9 @@ def dashboard_view (request):
     RequestConfig (request, paginate=False).configure (table)
 
     return render (request, "tables/dashboard.html", {'table': table, 'title': 'Tables overview',
-                                                      'sample_date': str (max_dt)})
+                                                      'sample_date': max_dt,
+                                                      'prev_day': navigation[0],
+                                                      'next_day': navigation[1]})
 
 def table_detail_view (request, table, sample=None):
     if sample == None:
@@ -46,6 +56,12 @@ def table_detail_view (request, table, sample=None):
     if s.table.name != table:
         raise Http404
 
+    navigation = reports.get_table_navigations (s.sample.date, table)
+    if s.hfileCountAvg:
+        avg_hfiles = "%.2f" % s.hfileCountAvg
+    else:
+        avg_hfiles = None
+
     data = [('Table name', table),
             ('Stat sampled', s.sample.date),
             ('Total size', table_utils.LargeNumberColumn.format (s.size)),
@@ -54,7 +70,7 @@ def table_detail_view (request, table, sample=None):
             ('Oldest HFile date', s.oldestHFile),
             ('Oldest HFile age', reports.dt_minus_date (s.sample.date, s.oldestHFile)),
             ('Count HFiles', s.hfileCount),
-            ('Average HFiles in region', "%.2f" % s.hfileCountAvg),
+            ('Average HFiles in region', avg_hfiles),
             ('Max HFiles in region', s.hfileCountMax)]
 
     data_table = DetailsTable ([{'name': n, 'value': v} for n, v in data])
@@ -64,7 +80,10 @@ def table_detail_view (request, table, sample=None):
     RequestConfig (request, paginate=False).configure (cf_table)
 
     return render (request, "tables/table.html", {'table': data_table, 'cf_table': cf_table,
-                                                  'name': table, 'sample': sample})
+                                                  'name': table, 'sample': sample,
+                                                  'sample_date': s.sample.date,
+                                                  'prev_day': navigation[0],
+                                                  'next_day': navigation[1]})
 
 
 def cf_detail_view (request, table, cf, sample=None):
@@ -77,8 +96,6 @@ def cf_detail_view (request, table, cf, sample=None):
     if s.cf.name != cf or s.cf.table.name != table:
         raise Http404
 
-    print s
-
     data = [('Table name', table),
             ('CF name', cf),
             ('Stat sampled', s.sample.date),
@@ -89,5 +106,10 @@ def cf_detail_view (request, table, cf, sample=None):
             ('Max HFiles', s.hfileCountMax)]
     data_table = DetailsTable ([{'name': n, 'value': v} for n, v in data])
 
+    navigation = reports.get_cf_navigations (s.sample.date, table, cf)
+
     return render (request, "tables/cf.html", {'table': data_table, 'table_name': table,
-                                               'cf_name': cf, 'sample': s.sample})
+                                               'cf_name': cf, 'sample': s.sample,
+                                               'sample_date': s.sample.date,
+                                               'prev_day': navigation[0],
+                                               'next_day': navigation[1]})
