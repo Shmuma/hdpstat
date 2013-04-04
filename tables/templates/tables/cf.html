@@ -1,0 +1,17 @@
+{% load render_table from django_tables2 %}
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" />
+        <link rel="stylesheet" href="{{ STATIC_URL }}counters/screen.css" />
+        <title>CF details of {{table_name}}/{{cf_name}}</title>
+    </head>
+    <body>
+      <h3>CF details of {{ table_name }}/{{ cf_name }} @ {{ sample }} </h3>
+      <p>
+        <div id="table">
+          {% render_table table %}
+        </div>
+      </p>
+    </body>
+</html>

@@ -35,5 +35,8 @@ def get_cf_data (tsample):
                      'avgSize': cfs.avgSize,
                      'hfiles': cfs.hfileCount,
                      'hfilesAvg': cfs.hfileCountAvg,
-                     'hfilesMax': cfs.hfileCountMax})
+                     'hfilesMax': cfs.hfileCountMax,
+                     'cf': cfs.cf.name,
+                     'table': tsample.table.name,
+                     'sample_id': cfs.pk})
     return res

@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
+from django.http import Http404
 
 import models
 import reports
-from tables import HBaseTablesTable, TableDetailsTable, CFsTable
+from tables import HBaseTablesTable, DetailsTable, CFsTable
 from hdpstat import table_utils
 
 from django.utils import timezone
@@ -42,6 +43,9 @@ def table_detail_view (request, table, sample=None):
     else:
         s = models.TableSample.objects.get (id=sample)
 
+    if s.table.name != table:
+        raise Http404
+
     data = [('Table name', table),
             ('Stat sampled', s.sample.date),
             ('Total size', table_utils.LargeNumberColumn.format (s.size)),
@@ -53,7 +57,7 @@ def table_detail_view (request, table, sample=None):
             ('Average HFiles in region', "%.2f" % s.hfileCountAvg),
             ('Max HFiles in region', s.hfileCountMax)]
 
-    data_table = TableDetailsTable ([{'name': n, 'value': v} for n, v in data])
+    data_table = DetailsTable ([{'name': n, 'value': v} for n, v in data])
 
     cf_table = CFsTable (reports.get_cf_data (s))
 
@@ -61,3 +65,29 @@ def table_detail_view (request, table, sample=None):
 
     return render (request, "tables/table.html", {'table': data_table, 'cf_table': cf_table,
                                                   'name': table, 'sample': sample})
+
+
+def cf_detail_view (request, table, cf, sample=None):
+    if sample == None:
+        s = models.CFSample.objects.filter (cf__table__name=table, cf__name=cf).order_by ("-sample__date")[0]
+    else:
+        s = models.CFSample.objects.get (id=sample)
+
+    # sanity check
+    if s.cf.name != cf or s.cf.table.name != table:
+        raise Http404
+
+    print s
+
+    data = [('Table name', table),
+            ('CF name', cf),
+            ('Stat sampled', s.sample.date),
+            ('Total size', table_utils.LargeNumberColumn.format (s.size)),
+            ('Average size', table_utils.LargeNumberColumn.format (s.avgSize)),
+            ('HFiles count', s.hfileCount),
+            ('Average HFiles', "%.2f" % s.hfileCountAvg),
+            ('Max HFiles', s.hfileCountMax)]
+    data_table = DetailsTable ([{'name': n, 'value': v} for n, v in data])
+
+    return render (request, "tables/cf.html", {'table': data_table, 'table_name': table,
+                                               'cf_name': cf, 'sample': s.sample})

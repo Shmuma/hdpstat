@@ -16,7 +16,7 @@ class HBaseTablesTable (tables.Table):
         attrs = {"class": "paleblue"}
 
 
-class TableDetailsTable (tables.Table):
+class DetailsTable (tables.Table):
     name = tables.Column ()
     value = tables.Column ()
 
@@ -26,7 +26,7 @@ class TableDetailsTable (tables.Table):
 
 
 class CFsTable (tables.Table):
-    name = tables.Column ()
+    name = tables.LinkColumn ('cf_detail', kwargs={'cf': A('name'), 'sample': A('sample_id'), 'table': A('table')})
     size = table_utils.LargeNumberColumn ()
     avgSize = table_utils.LargeNumberColumn ()
     hfiles = tables.Column ()

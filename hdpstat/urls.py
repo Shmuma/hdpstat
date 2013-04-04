@@ -14,9 +14,13 @@ urlpatterns = patterns('',
                        url (r'^aggregate_users', 'counters.views.not_implemented'),
                        url (r'^aggregate_groups', 'counters.views.not_implemented'),
                        
-                       url (r'hbase', 'tables.views.dashboard_view'),
-                       url (r'table/(?P<table>\w+)/(?P<sample>\d+)', 'tables.views.table_detail_view', name='table_detail'),
-                       url (r'table/(?P<table>\w+)', 'tables.views.table_detail_view'),
+                       url (r'hbase$', 'tables.views.dashboard_view'),
+                       url (r'hbase/(?P<table>\w+)/(?P<sample>\d+)$', 'tables.views.table_detail_view', name='table_detail'),
+                       url (r'hbase/(?P<table>\w+)$', 'tables.views.table_detail_view'),
+
+                       url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)/(?P<sample>\d+)$', 'tables.views.cf_detail_view', name='cf_detail'),
+                       url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)$', 'tables.views.cf_detail_view'),
+                       
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),
     # url(r'^hdpstat/', include('hdpstat.foo.urls')),
