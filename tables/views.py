@@ -29,6 +29,7 @@ def dashboard_view (request, sample=None):
     # get tables with data
     max_dt = None
     tables_data = []
+    total_data = {}
     for table in models.Table.objects.all ().order_by ("name"):
         # get latests table sample
         data, s_dt = reports.get_table_sample (name=table.name, before=now)
@@ -38,11 +39,20 @@ def dashboard_view (request, sample=None):
             tables_data.append (data)
             if max_dt == None or max_dt < s_dt:
                 max_dt = s_dt
+            for k in ['size', 'regions', 'hfiles']:
+                total_data[k] = data[k] + total_data.get (k, 0)
+
+    total = [('Total size', table_utils.LargeNumberColumn.format (total_data['size'])),
+             ('Regions count', total_data['regions']),
+             ('HFiles count', total_data['hfiles'])]
+
+    total_table = DetailsTable ([{'name': n, 'value': v} for n, v in total])
 
     table = HBaseTablesTable (tables_data)   
     RequestConfig (request, paginate=False).configure (table)
 
-    return render (request, "tables/dashboard.html", {'table': table, 'title': 'Tables overview',
+    return render (request, "tables/dashboard.html", {'total_table': total_table, 'table': table,
+                                                      'title': 'Tables overview',
                                                       'sample_date': max_dt,
                                                       'prev_day': navigation[0],
                                                       'next_day': navigation[1]})
