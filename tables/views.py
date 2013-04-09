@@ -132,18 +132,21 @@ def chart_tables_size (request):
 
     dt_limit = timezone.now () - datetime.timedelta (days=back_days)
 
-    # table -> array of (date, val) pairs
-    data = {}
+    data_table = {}
+    keys = []
 
-    for table in models.Table.objects.all ():
-        for ts in models.TableSample.objects.filter (table=table, sample__date__gte=dt_limit):
-            if not table.name in data:
-                data[table.name] = []
-            data[table.name].append ((ts.sample.date, ts.size))
+    for table in models.Table.objects.order_by ("name"):
+        k = table.name
+        count = 0
+        for ts in models.TableSample.objects.filter (table=table, sample__date__gte=dt_limit):       
+            count += 1
+            d = ts.sample.date.replace (minute=0, second=0, microsecond=0)
 
-#    resp.write ("%s<br/>" % data)
-
-    keys, data_table = reports.prepare_chart_data (data)
+            if not d in data_table:
+                data_table[d] = {}
+            data_table[d][k] = ts.size
+        if count > 0:
+            keys.append (k)
 
     dates = data_table.keys ()
     dates.sort ()
