@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import Http404
+from django.http import HttpResponse, Http404
 
 import models
 import reports
@@ -9,8 +9,9 @@ from hdpstat import table_utils
 from django.utils import timezone
 from django_tables2 import RequestConfig
 
+import os
 import datetime
-
+import subprocess
 
 def dashboard_view (request, sample=None):
     """
@@ -123,3 +124,55 @@ def cf_detail_view (request, table, cf, sample=None):
                                                'sample_date': s.sample.date,
                                                'prev_day': navigation[0],
                                                'next_day': navigation[1]})
+
+
+def chart_tables_size (request):
+    # for each table, get historical samples for given amount of days
+    back_days = 60
+
+    dt_limit = timezone.now () - datetime.timedelta (days=back_days)
+
+    # table -> array of (date, val) pairs
+    data = {}
+
+    for table in models.Table.objects.all ():
+        for ts in models.TableSample.objects.filter (table=table, sample__date__gte=dt_limit):
+            if not table.name in data:
+                data[table.name] = []
+            data[table.name].append ((ts.sample.date, ts.size))
+
+#    resp.write ("%s<br/>" % data)
+
+    keys, data_table = reports.prepare_chart_data (data)
+
+    dates = data_table.keys ()
+    dates.sort ()
+
+    # prepare data string
+    chart_data = ""
+    for date in dates:
+        chart_data += "%s" % date
+        for k in keys:
+            val = data_table[date].get (k, "-")
+            chart_data += ",%s" % val
+        chart_data += "\n"
+
+
+    if request.GET.get ('text', False):
+        resp = HttpResponse (content_type='text/plain')
+        resp.write ("%s\n" % os.getcwd ())
+        resp.write ("Keys: %s\n" % ", ".join (keys))
+        resp.write (chart_data)
+#    resp.write ("Data len: %d<br/>" % len (data_table))
+#    resp.write ("Data: %s<br/>" % data_table)
+    else:
+        # start ploticus           
+        resp = HttpResponse (content_type='image/png')
+        
+        p = subprocess.Popen (["ploticus", "-png", "-o", "stdout", "area.txt"],
+                              stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+        stdout, stderr = p.communicate (input=chart_data)
+        if p.returncode == 0:
+            print len (stdout)
+            resp.write (stdout)
+    return resp

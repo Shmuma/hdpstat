@@ -120,3 +120,27 @@ def get_cf_navigations (dt_now, table, cf):
     prev_day = get_sample_before (dt_now - datetime.timedelta (days=1))
     next_day = get_sample_after (dt_now + datetime.timedelta (days=1))
     return (prev_day, next_day)
+
+
+def prepare_chart_data (data):
+    """
+    Gets dict of data, suitable for chart generation
+
+    Input data hash keys of some string, return is a pair with keys array and dict of datetime -> [vals]
+    Date is rounded by hours
+    """
+
+    keys = data.keys ()
+    keys.sort ()
+
+    result = {}
+
+    # prepare table to fill
+    for k, d in data.iteritems ():
+        for date, val in d:
+            d = date.replace (minute=0, second=0, microsecond=0)
+            if not d in result:
+                result[d] = {}
+            result[d][k] = val
+
+    return keys, result

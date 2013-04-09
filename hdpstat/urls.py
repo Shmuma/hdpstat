@@ -16,11 +16,14 @@ urlpatterns = patterns('',
                        
                        url (r'hbase$', 'tables.views.dashboard_view'),
                        url (r'hbase/(?P<sample>\d+)$', 'tables.views.dashboard_view', name="tables"),
+
                        url (r'hbase/(?P<table>\w+)/(?P<sample>\d+)$', 'tables.views.table_detail_view', name='table_detail'),
                        url (r'hbase/(?P<table>\w+)$', 'tables.views.table_detail_view'),
 
                        url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)/(?P<sample>\d+)$', 'tables.views.cf_detail_view', name='cf_detail'),
                        url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)$', 'tables.views.cf_detail_view'),
+
+                       url (r'hbase/_chart/tables/size', 'tables.views.chart_tables_size'),
                        
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),
