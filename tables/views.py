@@ -3,6 +3,7 @@ from django.http import HttpResponse, Http404
 
 import models
 import reports
+import charts
 from tables import HBaseTablesTable, DetailsTable, CFsTable
 from hdpstat import table_utils
 
@@ -30,7 +31,7 @@ def dashboard_view (request, sample=None):
     # get tables with data
     max_dt = None
     tables_data = []
-    total_data = {}
+    total_data = {'size': 0, 'regions': 0, 'hfiles': 0}
     for table in models.Table.objects.all ().order_by ("name"):
         # get latests table sample
         data, s_dt = reports.get_table_sample (name=table.name, before=now)
@@ -128,7 +129,7 @@ def cf_detail_view (request, table, cf, sample=None):
 
 def chart_tables_size (request):
     # for each table, get historical samples for given amount of days
-    back_days = 60
+    back_days = int (request.GET.get ('days', 14))
 
     dt_limit = timezone.now () - datetime.timedelta (days=back_days)
 
@@ -155,27 +156,29 @@ def chart_tables_size (request):
     chart_data = ""
     for date in dates:
         chart_data += "%s" % date
+        s = 0
         for k in keys:
-            val = data_table[date].get (k, "-")
-            chart_data += ",%s" % val
+            val = data_table[date].get (k, 0)
+            s += val
+            chart_data += ",%s" % s
         chart_data += "\n"
-
 
     if request.GET.get ('text', False):
         resp = HttpResponse (content_type='text/plain')
         resp.write ("%s\n" % os.getcwd ())
         resp.write ("Keys: %s\n" % ", ".join (keys))
         resp.write (chart_data)
-#    resp.write ("Data len: %d<br/>" % len (data_table))
-#    resp.write ("Data: %s<br/>" % data_table)
     else:
+        pls_file = charts.generate_area_pls (items=keys, title="Table sizes for last %d days" % back_days)
+
         # start ploticus           
         resp = HttpResponse (content_type='image/png')
         
-        p = subprocess.Popen (["ploticus", "-png", "-o", "stdout", "area.txt"],
+        p = subprocess.Popen (["ploticus", "-font", "FreeSans", "-png", "-o", "stdout", pls_file],
+                              env={"GDFONTPATH": os.getcwd ()},
                               stdin=subprocess.PIPE, stdout=subprocess.PIPE)
         stdout, stderr = p.communicate (input=chart_data)
         if p.returncode == 0:
-            print len (stdout)
             resp.write (stdout)
+        os.unlink (pls_file)
     return resp
