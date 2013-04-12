@@ -29,8 +29,9 @@ class LargeNumberColumn (tables.Column):
         super (LargeNumberColumn, self).__init__ (**extra)
         self.divider = divider
 
+
     @staticmethod
-    def format (value):
+    def best_suffix_and_mul (value):
         # maps power of 10 to apropriate suffix
         power_to_suffix = {
             3: 'K',
@@ -47,9 +48,15 @@ class LargeNumberColumn (tables.Column):
         prev_suffix = ''
         for power in sorted (power_to_suffix.keys ()):
             if value < pow (10, power):
-                return "%.2f%s" % (float (value) / pow (10, prev_power), prev_suffix)
+                return (1.0 / pow (10, prev_power), prev_suffix)
             prev_power = power
-            prev_suffix = power_to_suffix[power]
+            prev_suffix = power_to_suffix[power]       
+
+
+    @staticmethod
+    def format (value):
+        mul, suff = LargeNumberColumn.best_suffix_and_mul (value)
+        return "%.2f%s" % (float (value) * mul , suff)
 
 
     def render (self, value):

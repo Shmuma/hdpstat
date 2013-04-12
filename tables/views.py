@@ -128,57 +128,70 @@ def cf_detail_view (request, table, cf, sample=None):
 
 
 def chart_tables_size (request):
-    # for each table, get historical samples for given amount of days
-    back_days = int (request.GET.get ('days', 14))
+    back_days = int (request.GET.get ('days', 30))
 
-    dt_limit = timezone.now () - datetime.timedelta (days=back_days)
+    keys, data_table = reports.get_tables_chart_data (back_days, 'size')
+    chart_data = charts.format_chart_data (keys, data_table)
 
-    data_table = {}
-    keys = []
+    mult, suffix = charts.data_multiplier (data_table)
+    pls_file = charts.generate_area_pls (items=keys, title="Table sizes for last %d days" % back_days,
+                                         yaxis="Size", mult=mult, suffix=suffix+"B")
+    image = charts.generate_chart (pls_file, chart_data)
 
-    for table in models.Table.objects.order_by ("name"):
-        k = table.name
-        count = 0
-        for ts in models.TableSample.objects.filter (table=table, sample__date__gte=dt_limit):       
-            count += 1
-            d = ts.sample.date.replace (minute=0, second=0, microsecond=0)
+    if image == None:
+        raise Http404
 
-            if not d in data_table:
-                data_table[d] = {}
-            data_table[d][k] = ts.size
-        if count > 0:
-            keys.append (k)
+    resp = HttpResponse (content_type='image/png')
+    resp.write (image)
+    os.unlink (pls_file)
 
-    dates = data_table.keys ()
-    dates.sort ()
-
-    # prepare data string
-    chart_data = ""
-    for date in dates:
-        chart_data += "%s" % date
-        s = 0
-        for k in keys:
-            val = data_table[date].get (k, 0)
-            s += val
-            chart_data += ",%s" % s
-        chart_data += "\n"
-
-    if request.GET.get ('text', False):
-        resp = HttpResponse (content_type='text/plain')
-        resp.write ("%s\n" % os.getcwd ())
-        resp.write ("Keys: %s\n" % ", ".join (keys))
-        resp.write (chart_data)
-    else:
-        pls_file = charts.generate_area_pls (items=keys, title="Table sizes for last %d days" % back_days)
-
-        # start ploticus           
-        resp = HttpResponse (content_type='image/png')
-        
-        p = subprocess.Popen (["ploticus", "-font", "FreeSans", "-png", "-o", "stdout", pls_file],
-                              env={"GDFONTPATH": os.getcwd ()},
-                              stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        stdout, stderr = p.communicate (input=chart_data)
-        if p.returncode == 0:
-            resp.write (stdout)
-        os.unlink (pls_file)
     return resp
+
+
+def chart_tables_region_count (request):
+    # for each table, get historical samples for given amount of days
+    back_days = int (request.GET.get ('days', 30))
+
+    keys, data_table = reports.get_tables_chart_data (back_days, 'regions')
+    chart_data = charts.format_chart_data (keys, data_table)
+
+    pls_file = charts.generate_area_pls (items=keys, title="Regions count for %d days" % back_days,
+                                         yaxis="Regions")
+    image = charts.generate_chart (pls_file, chart_data)
+
+    if image == None:
+        raise Http404
+
+    resp = HttpResponse (content_type='image/png')
+    resp.write (image)
+    os.unlink (pls_file)
+
+    return resp
+
+
+def chart_tables_hfile_count (request):
+    # for each table, get historical samples for given amount of days
+    back_days = int (request.GET.get ('days', 30))
+
+    keys, data_table = reports.get_tables_chart_data (back_days, 'hfileCount')
+    chart_data = charts.format_chart_data (keys, data_table)
+
+    pls_file = charts.generate_area_pls (items=keys, title="HFiles count for %d days" % back_days,
+                                         yaxis="HFiles")
+    image = charts.generate_chart (pls_file, chart_data)
+
+    if image == None:
+        raise Http404
+
+    resp = HttpResponse (content_type='image/png')
+    resp.write (image)
+    os.unlink (pls_file)
+
+    return resp
+
+
+def tables_size_charts (request):
+    """
+    Display bunch of charts for tables
+    """
+    return None

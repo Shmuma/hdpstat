@@ -9,25 +9,43 @@
     <body>
       <h3>Tables @ {{ sample_date }} </h3>
 
-      <p>
-      {% if prev_day %}
-      <a href="{% url tables sample=prev_day.id %}">{{prev_day.date.date}}</a>
-      {% endif %}
+      <div style="float: left;">
+        <div>
+          <p>
+            {% if prev_day %}
+            <a href="{% url tables sample=prev_day.id %}">{{prev_day.date.date}}</a>
+            {% endif %}
 
-      {% if next_day %}
-      <a href="{% url tables sample=next_day.id %}">{{next_day.date.date}}</a>
-      {% endif %}
-      </p>
+            {% if next_day %}
+            <a href="{% url tables sample=next_day.id %}">{{next_day.date.date}}</a>
+            {% endif %}
+          </p>
 
-      <p>
-        <div id="table">
-          {% render_table total_table %}
-        </div>
-      </p>
-      <p>
-        <div id="table">
-          {% render_table table %}
-        </div>
-      </p>
+          <div>
+            <div id="table">
+              {% render_table total_table %}
+            </div>
+            <div id="table">
+              {% render_table table %}
+            </div>
+          </div> 
+        </div> 
+
+        <div>
+          <a href="/hbase/_charts/tables/sizes">
+            <img src="/hbase/_charts/tables/size" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="/hbase/_charts/tables/regions">
+            <img src="/hbase/_charts/tables/region_count" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="/hbase/_charts/tables/hfiles">
+            <img src="/hbase/_charts/tables/hfile_count" class="" alt="" />
+          </a>
+        </div> 
+      </div> 
     </body>
 </html>

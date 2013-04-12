@@ -1,7 +1,8 @@
 import models
 
 import datetime
-from django.utils.timezone import utc
+from django.utils.timezone import utc, now
+from django.db import connection
 
 def get_table_sample (name, before):
     """
@@ -121,3 +122,41 @@ def get_cf_navigations (dt_now, table, cf):
     next_day = get_sample_after (dt_now + datetime.timedelta (days=1))
     return (prev_day, next_day)
 
+
+def get_tables_chart_data (back_days, table_sample_field):
+    """
+    Builds list of tables and data for tables overview charts.
+    Accessor is applied to TableSample object to obtain numeric value
+    """
+    dt_limit = now () - datetime.timedelta (days=back_days)
+
+    data_table = {}
+    keys = []
+
+    for table in models.Table.objects.order_by ("name"):
+        k = table.name
+        count = 0
+
+        sql = """select s.date, ts.""" + table_sample_field + """ from tables_tablesample ts, 
+                 tables_sample s, tables_table t
+                 where ts.table_id = t.id and ts.sample_id = s.id and s.date >= %(date_limit)s and 
+                 t.name = %(table)s"""
+
+        args = { 'date_limit': dt_limit,  'table': table.name }
+
+        cur = connection.cursor ()
+        cur.execute (sql, args)
+        for date, value in cur.fetchall ():
+            if value == None:
+                continue
+            count += 1
+            d = date.replace (minute=0, second=0, microsecond=0)
+
+            if not d in data_table:
+                data_table[d] = {}
+            data_table[d][k] = value
+
+        if count > 0:
+            keys.append (k)
+
+    return keys, data_table
