@@ -2,7 +2,7 @@ import os
 import subprocess
 from hdpstat import table_utils
 
-def generate_area_pls (items, title, yaxis, mult=1, suffix=""):
+def generate_pls (items, title, yaxis, mult=1, suffix="", area=True):
     """
     Produce ploticus script for area plot. Return filename of produced pls
     """
@@ -49,11 +49,15 @@ def generate_area_pls (items, title, yaxis, mult=1, suffix=""):
     for i, item in enumerate (reversed (items)):
         data += """
 #proc lineplot
-  fill: %(color)s
   xfield: 1
   yfield: %(index)d
   legendlabel: %(label)s
-""" % {'index': 1+len (items) - i, 'label': item, 'color': colors[i]}
+""" % {'index': 1+len (items) - i, 'label': item}
+        if area:
+            data += "fill: %s\n" % colors[i]
+        else:
+            data += "linedetails: color=%s\n" % colors[i]
+
         
 
     data += """

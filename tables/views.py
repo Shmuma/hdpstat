@@ -135,8 +135,8 @@ def chart_tables_size (request):
     chart_data = charts.format_chart_data (keys, data_table)
 
     mult, suffix = charts.data_multiplier (data_table)
-    pls_file = charts.generate_area_pls (items=keys, title="Table sizes for %s" % period_name,
-                                         yaxis="Size", mult=mult, suffix=suffix+"B")
+    pls_file = charts.generate_pls (items=keys, title="Table sizes for %s" % period_name,
+                                    yaxis="Size", mult=mult, suffix=suffix+"B")
     image = charts.generate_chart (pls_file, chart_data)
 
     if image == None:
@@ -156,8 +156,8 @@ def chart_tables_region_count (request):
     chart_data = charts.format_chart_data (keys, data_table)
     mult, suffix = charts.data_multiplier (data_table)
 
-    pls_file = charts.generate_area_pls (items=keys, title="Regions count for %s" % period_name,
-                                         yaxis="Regions", mult=mult, suffix=suffix)
+    pls_file = charts.generate_pls (items=keys, title="Regions count for %s" % period_name,
+                                    yaxis="Regions", mult=mult, suffix=suffix)
     image = charts.generate_chart (pls_file, chart_data)
 
     if image == None:
@@ -177,8 +177,8 @@ def chart_tables_hfile_count (request):
     chart_data = charts.format_chart_data (keys, data_table)
     mult, suffix = charts.data_multiplier (data_table)
 
-    pls_file = charts.generate_area_pls (items=keys, title="HFiles count for %s" % period_name,
-                                         yaxis="HFiles", mult=mult, suffix=suffix)
+    pls_file = charts.generate_pls (items=keys, title="HFiles count for %s" % period_name,
+                                    yaxis="HFiles", mult=mult, suffix=suffix)
     image = charts.generate_chart (pls_file, chart_data)
 
     if image == None:
@@ -201,8 +201,8 @@ def chart_tables_hfile_age (request):
     chart_data = charts.format_chart_data (keys, data_table, aggregate=False)
     mult, suffix = charts.data_multiplier (data_table)
     
-    pls_file = charts.generate_area_pls (items=keys, title="HFiles max age for %s" % period_name,
-                                         yaxis="Days", mult=mult, suffix=suffix)
+    pls_file = charts.generate_pls (items=keys, title="HFiles max age for %s" % period_name,
+                                    yaxis="Days", mult=mult, suffix=suffix, area=True)
     image = charts.generate_chart (pls_file, chart_data)
 
     if image == None:
