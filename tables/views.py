@@ -127,82 +127,32 @@ def cf_detail_view (request, table, cf, sample=None):
                                                'prev_day': navigation[0],
                                                'next_day': navigation[1]})
 
-
-def chart_tables_size (request):
-    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
-
-    keys, data_table = reports.get_tables_chart_data (back_days, 'size')
-    chart_data = charts.format_chart_data (keys, data_table)
-
-    mult, suffix = charts.data_multiplier (data_table)
-    pls_file = charts.generate_pls (items=keys, title="Table sizes for %s" % period_name,
-                                    yaxis="Size", mult=mult, suffix=suffix+"B")
-    image = charts.generate_chart (pls_file, chart_data)
-
-    if image == None:
-        raise Http404
-
-    resp = HttpResponse (content_type='image/png')
-    resp.write (image)
-    os.unlink (pls_file)
-
-    return resp
-
-
-def chart_tables_region_count (request):
-    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
-
-    keys, data_table = reports.get_tables_chart_data (back_days, 'regions')
-    chart_data = charts.format_chart_data (keys, data_table)
-    mult, suffix = charts.data_multiplier (data_table)
-
-    pls_file = charts.generate_pls (items=keys, title="Regions count for %s" % period_name,
-                                    yaxis="Regions", mult=mult, suffix=suffix)
-    image = charts.generate_chart (pls_file, chart_data)
-
-    if image == None:
-        raise Http404
-
-    resp = HttpResponse (content_type='image/png')
-    resp.write (image)
-    os.unlink (pls_file)
-
-    return resp
-
-
-def chart_tables_hfile_count (request):
-    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
-
-    keys, data_table = reports.get_tables_chart_data (back_days, 'hfileCount')
-    chart_data = charts.format_chart_data (keys, data_table)
-    mult, suffix = charts.data_multiplier (data_table)
-
-    pls_file = charts.generate_pls (items=keys, title="HFiles count for %s" % period_name,
-                                    yaxis="HFiles", mult=mult, suffix=suffix)
-    image = charts.generate_chart (pls_file, chart_data)
-
-    if image == None:
-        raise Http404
-
-    resp = HttpResponse (content_type='image/png')
-    resp.write (image)
-    os.unlink (pls_file)
-
-    return resp
-
-
-def chart_tables_hfile_age (request):
-    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
-
+def chart_tables (request, kind):
+    """
+    Misc charts for tables dashboard
+    """
     now = timezone.now ()
 
-    keys, data_table = reports.get_tables_chart_data (back_days, 'oldestHFile', 
-                              filter=lambda oldest: reports.dt_minus_date (now, oldest).total_seconds () / 86400.0)
-    chart_data = charts.format_chart_data (keys, data_table, aggregate=False)
+    kinds = {'size':          ("Size of tables for %s", "Size", "B", True, None),
+             'regionSizeAvg': ("Average size of regions for %s", "Size", "B", True, None),
+             'regions':       ("Regions count for %s", "Regions", "", True, None),
+             'hfileCount':    ("HFiles count for %s", "HFiles", "", True, None),
+             'oldestHFile':   ("Max age of HFiles for %s", "Days", "", False,
+                               lambda oldest: reports.dt_minus_date (now, oldest).total_seconds () / 86400.0)}
+
+    if not kind in kinds:
+        raise Http404
+
+    title, yaxis, suff, aggr, filter = kinds[kind]
+
+    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
+
+    keys, data_table = reports.get_tables_chart_data (back_days, kind, filter=filter)
+    chart_data = charts.format_chart_data (keys, data_table, aggregate=aggr)
     mult, suffix = charts.data_multiplier (data_table)
     
-    pls_file = charts.generate_pls (items=keys, title="HFiles max age for %s" % period_name,
-                                    yaxis="Days", mult=mult, suffix=suffix, area=True)
+    pls_file = charts.generate_pls (items=keys, title=title % period_name,
+                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True)
     image = charts.generate_chart (pls_file, chart_data)
 
     if image == None:
@@ -214,8 +164,8 @@ def chart_tables_hfile_age (request):
     return resp
 
 
-def chart_details (request, view):
+def chart_details (request, view, kind):
     """
     Display bunch of charts for tables
     """
-    return render (request, "tables/chart_details.html", { 'url': reverse (view) })
+    return render (request, "tables/chart_details.html", { 'url': reverse (view, args=(kind,)) })

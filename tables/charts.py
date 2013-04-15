@@ -113,3 +113,5 @@ def data_multiplier (data_table):
         max_val = max (arr.values () + [max_val])
 
     return table_utils.LargeNumberColumn.best_suffix_and_mul (max_val)
+
+

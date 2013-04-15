@@ -23,11 +23,8 @@ urlpatterns = patterns('',
                        url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)/(?P<sample>\d+)$', 'tables.views.cf_detail_view', name='cf_detail'),
                        url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)$', 'tables.views.cf_detail_view'),
 
-                       url (r'hbase/_charts/tables/size$', 'tables.views.chart_tables_size', name="chart_tables_size"),
-                       url (r'hbase/_charts/tables/region_count$', 'tables.views.chart_tables_region_count', name="chart_tables_region_count"),
-                       url (r'hbase/_charts/tables/hfile_count$', 'tables.views.chart_tables_hfile_count', name="chart_tables_hfile_count"),
-                       url (r'hbase/_charts/tables/hfile_age$', 'tables.views.chart_tables_hfile_age', name="chart_tables_hfile_age"),
-                       url (r'hbase/_charts/details/(?P<view>.+)$', 'tables.views.chart_details', name="chart_details"),
+                       url (r'hbase/_charts/tables/(?P<kind>\w+)$', 'tables.views.chart_tables', name="chart_tables"),
+                       url (r'hbase/_charts/details/(?P<view>.+)/(?P<kind>.+)$', 'tables.views.chart_details', name="chart_details"),
                        
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),

@@ -32,23 +32,28 @@
         </div> 
 
         <div>
-          <a href="{% url chart_details view='chart_tables_size' %}">
-            <img src="{% url chart_tables_size %}" class="" alt="" />
+          <a href="{% url chart_details view='chart_tables' kind='size' %}">
+            <img src="{% url chart_tables kind='size' %}" class="" alt="" />
           </a>
         </div> 
         <div>
-          <a href="{% url chart_details view='chart_tables_region_count' %}">
-            <img src="{% url chart_tables_region_count %}" class="" alt="" />
+          <a href="{% url chart_details view='chart_tables' kind='regions' %}">
+            <img src="{% url chart_tables kind='regions' %}" class="" alt="" />
           </a>
         </div> 
         <div>
-          <a href="{% url chart_details view='chart_tables_hfile_count' %}">
-            <img src="{% url chart_tables_hfile_count %}" class="" alt="" />
+          <a href="{% url chart_details view='chart_tables' kind='regionSizeAvg' %}">
+            <img src="{% url chart_tables kind='regionSizeAvg' %}" class="" alt="" />
           </a>
         </div> 
         <div>
-          <a href="{% url chart_details view='chart_tables_hfile_age' %}">
-            <img src="{% url chart_tables_hfile_age %}" class="" alt="" />
+          <a href="{% url chart_details view='chart_tables' kind='hfileCount' %}">
+            <img src="{% url chart_tables kind='hfileCount' %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_details view='chart_tables' kind='oldestHFile' %}">
+            <img src="{% url chart_tables kind='oldestHFile' %}" class="" alt="" />
           </a>
         </div> 
       </div> 
