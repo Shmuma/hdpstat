@@ -21,7 +21,7 @@ def generate_area_pls (items, title, yaxis, mult=1, suffix=""):
 #proc areadef
   title: %(title)s
   titledetails: align=C size=10 adjust=0,0.2
-  xscaletype: datetime yyyy-mm-dd hh:mm:ss
+  xscaletype: datetime yyyy-mm-dd hh:mm
   yscaletype: linear
   xautorange: datafield=1
   yautorange: datafield=%(item_indices)s
@@ -50,6 +50,7 @@ def generate_area_pls (items, title, yaxis, mult=1, suffix=""):
         data += """
 #proc lineplot
   fill: %(color)s
+  xfield: 1
   yfield: %(index)d
   legendlabel: %(label)s
 """ % {'index': 1+len (items) - i, 'label': item, 'color': colors[i]}
@@ -66,7 +67,7 @@ def generate_area_pls (items, title, yaxis, mult=1, suffix=""):
 
 
 
-def format_chart_data (keys, data_table):
+def format_chart_data (keys, data_table, aggregate=True):
     """
     Format data to string ready to be fed to ploticus
     """
@@ -76,11 +77,14 @@ def format_chart_data (keys, data_table):
     # prepare data string
     chart_data = ""
     for date in dates:
-        chart_data += "%s" % date
+        chart_data += date.strftime ("%Y-%m-%d.%H:%M")
         s = 0
         for k in keys:
             val = data_table[date].get (k, 0)
-            s += val
+            if aggregate:
+                s += val
+            else:
+                s = val
             chart_data += ",%s" % s
         chart_data += "\n"
     return chart_data

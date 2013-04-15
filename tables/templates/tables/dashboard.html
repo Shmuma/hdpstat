@@ -37,13 +37,18 @@
           </a>
         </div> 
         <div>
-          <a href="/hbase/_charts/tables/regions">
-            <img src="/hbase/_charts/tables/region_count" class="" alt="" />
+          <a href="{% url chart_details view='chart_tables_region_count' %}">
+            <img src="{% url chart_tables_region_count %}" class="" alt="" />
           </a>
         </div> 
         <div>
-          <a href="/hbase/_charts/tables/hfiles">
-            <img src="/hbase/_charts/tables/hfile_count" class="" alt="" />
+          <a href="{% url chart_details view='chart_tables_hfile_count' %}">
+            <img src="{% url chart_tables_hfile_count %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_details view='chart_tables_hfile_age' %}">
+            <img src="{% url chart_tables_hfile_age %}" class="" alt="" />
           </a>
         </div> 
       </div> 

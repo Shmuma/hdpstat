@@ -123,7 +123,7 @@ def get_cf_navigations (dt_now, table, cf):
     return (prev_day, next_day)
 
 
-def get_tables_chart_data (back_days, table_sample_field):
+def get_tables_chart_data (back_days, table_sample_field, filter=None):
     """
     Builds list of tables and data for tables overview charts.
     Accessor is applied to TableSample object to obtain numeric value
@@ -157,6 +157,8 @@ def get_tables_chart_data (back_days, table_sample_field):
 
             if not d in data_table:
                 data_table[d] = {}
+            if filter != None:
+                value = filter (value)
             data_table[d][k] = value
 
         if count > 0:

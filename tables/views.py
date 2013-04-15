@@ -154,9 +154,10 @@ def chart_tables_region_count (request):
 
     keys, data_table = reports.get_tables_chart_data (back_days, 'regions')
     chart_data = charts.format_chart_data (keys, data_table)
+    mult, suffix = charts.data_multiplier (data_table)
 
     pls_file = charts.generate_area_pls (items=keys, title="Regions count for %s" % period_name,
-                                         yaxis="Regions")
+                                         yaxis="Regions", mult=mult, suffix=suffix)
     image = charts.generate_chart (pls_file, chart_data)
 
     if image == None:
@@ -174,9 +175,10 @@ def chart_tables_hfile_count (request):
 
     keys, data_table = reports.get_tables_chart_data (back_days, 'hfileCount')
     chart_data = charts.format_chart_data (keys, data_table)
+    mult, suffix = charts.data_multiplier (data_table)
 
     pls_file = charts.generate_area_pls (items=keys, title="HFiles count for %s" % period_name,
-                                         yaxis="HFiles")
+                                         yaxis="HFiles", mult=mult, suffix=suffix)
     image = charts.generate_chart (pls_file, chart_data)
 
     if image == None:
@@ -186,6 +188,29 @@ def chart_tables_hfile_count (request):
     resp.write (image)
     os.unlink (pls_file)
 
+    return resp
+
+
+def chart_tables_hfile_age (request):
+    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
+
+    now = timezone.now ()
+
+    keys, data_table = reports.get_tables_chart_data (back_days, 'oldestHFile', 
+                              filter=lambda oldest: reports.dt_minus_date (now, oldest).total_seconds () / 86400.0)
+    chart_data = charts.format_chart_data (keys, data_table, aggregate=False)
+    mult, suffix = charts.data_multiplier (data_table)
+    
+    pls_file = charts.generate_area_pls (items=keys, title="HFiles max age for %s" % period_name,
+                                         yaxis="Days", mult=mult, suffix=suffix)
+    image = charts.generate_chart (pls_file, chart_data)
+
+    if image == None:
+        raise Http404
+
+    resp = HttpResponse (content_type='image/png')
+    resp.write (image)
+    os.unlink (pls_file)
     return resp
 
 
