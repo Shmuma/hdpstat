@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
+from django.core.urlresolvers import reverse
 
 import models
 import reports
@@ -128,13 +129,13 @@ def cf_detail_view (request, table, cf, sample=None):
 
 
 def chart_tables_size (request):
-    back_days = int (request.GET.get ('days', 30))
+    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
 
     keys, data_table = reports.get_tables_chart_data (back_days, 'size')
     chart_data = charts.format_chart_data (keys, data_table)
 
     mult, suffix = charts.data_multiplier (data_table)
-    pls_file = charts.generate_area_pls (items=keys, title="Table sizes for last %d days" % back_days,
+    pls_file = charts.generate_area_pls (items=keys, title="Table sizes for %s" % period_name,
                                          yaxis="Size", mult=mult, suffix=suffix+"B")
     image = charts.generate_chart (pls_file, chart_data)
 
@@ -149,13 +150,12 @@ def chart_tables_size (request):
 
 
 def chart_tables_region_count (request):
-    # for each table, get historical samples for given amount of days
-    back_days = int (request.GET.get ('days', 30))
+    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
 
     keys, data_table = reports.get_tables_chart_data (back_days, 'regions')
     chart_data = charts.format_chart_data (keys, data_table)
 
-    pls_file = charts.generate_area_pls (items=keys, title="Regions count for %d days" % back_days,
+    pls_file = charts.generate_area_pls (items=keys, title="Regions count for %s" % period_name,
                                          yaxis="Regions")
     image = charts.generate_chart (pls_file, chart_data)
 
@@ -170,13 +170,12 @@ def chart_tables_region_count (request):
 
 
 def chart_tables_hfile_count (request):
-    # for each table, get historical samples for given amount of days
-    back_days = int (request.GET.get ('days', 30))
+    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
 
     keys, data_table = reports.get_tables_chart_data (back_days, 'hfileCount')
     chart_data = charts.format_chart_data (keys, data_table)
 
-    pls_file = charts.generate_area_pls (items=keys, title="HFiles count for %d days" % back_days,
+    pls_file = charts.generate_area_pls (items=keys, title="HFiles count for %s" % period_name,
                                          yaxis="HFiles")
     image = charts.generate_chart (pls_file, chart_data)
 
@@ -190,8 +189,8 @@ def chart_tables_hfile_count (request):
     return resp
 
 
-def tables_size_charts (request):
+def chart_details (request, view):
     """
     Display bunch of charts for tables
     """
-    return None
+    return render (request, "tables/chart_details.html", { 'url': reverse (view) })

@@ -20,7 +20,7 @@ def generate_area_pls (items, title, yaxis, mult=1, suffix=""):
 
 #proc areadef
   title: %(title)s
-  titledetails: align=C size=10 adjust=-0.5,0.2
+  titledetails: align=C size=10 adjust=0,0.2
   xscaletype: datetime yyyy-mm-dd hh:mm:ss
   yscaletype: linear
   xautorange: datafield=1

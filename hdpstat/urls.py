@@ -23,10 +23,10 @@ urlpatterns = patterns('',
                        url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)/(?P<sample>\d+)$', 'tables.views.cf_detail_view', name='cf_detail'),
                        url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)$', 'tables.views.cf_detail_view'),
 
-                       url (r'hbase/_charts/tables/size$', 'tables.views.chart_tables_size'),
+                       url (r'hbase/_charts/tables/size$', 'tables.views.chart_tables_size', name="chart_tables_size"),
                        url (r'hbase/_charts/tables/region_count$', 'tables.views.chart_tables_region_count'),
                        url (r'hbase/_charts/tables/hfile_count$', 'tables.views.chart_tables_hfile_count'),
-                       url (r'hbase/_charts/tables/sizes$', 'tables.views.tables_size_charts'),
+                       url (r'hbase/_charts/details/(?P<view>.+)$', 'tables.views.chart_details', name="chart_details"),
                        
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),

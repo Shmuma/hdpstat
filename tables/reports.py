@@ -128,7 +128,10 @@ def get_tables_chart_data (back_days, table_sample_field):
     Builds list of tables and data for tables overview charts.
     Accessor is applied to TableSample object to obtain numeric value
     """
-    dt_limit = now () - datetime.timedelta (days=back_days)
+    if back_days != None:
+        dt_limit = now () - datetime.timedelta (days=back_days)
+    else:
+        dt_limit = datetime.datetime (1970, 1, 1, tzinfo=utc)
 
     data_table = {}
     keys = []
@@ -160,3 +163,15 @@ def get_tables_chart_data (back_days, table_sample_field):
             keys.append (k)
 
     return keys, data_table
+
+
+def get_chart_period (period):
+    """
+    By named period, return pair of days number and human-readable period name
+    """
+    data = {'2weeks': (14, "two weeks"),
+            'month': (30, "a month"),
+            '3months': (90, "three months"),
+            'year': (365, "a year")}
+
+    return data.get (period, (None, "all time"))
