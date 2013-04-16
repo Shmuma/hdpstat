@@ -2,7 +2,7 @@ import os
 import subprocess
 from hdpstat import table_utils
 
-def generate_pls (items, title, yaxis, mult=1, suffix="", area=True, color_idx=None):
+def generate_pls (items, title, yaxis, mult=1, suffix="", area=True, color_idx=None, data=""):
     """
     Produce ploticus script for area plot. Return filename of produced pls
     """
@@ -11,9 +11,10 @@ def generate_pls (items, title, yaxis, mult=1, suffix="", area=True, color_idx=N
 
     data = """
 #proc getdata
-  standardinput: yes
   delim: comma
-//  showdata: yes
+  data:
+%(data)s
+
 
 //#proc page
 //  pixsize: 640 480
@@ -39,7 +40,7 @@ def generate_pls (items, title, yaxis, mult=1, suffix="", area=True, color_idx=N
       grid: color=gray(0.8) style=1
       stubformat: autoround
       stubmult: %(mult)s
-""" % {'title': title, 'item_indices': ",".join (map (str, range (2, len (items)+2))),
+""" % {'data': data, 'title': title, 'item_indices': ",".join (map (str, range (2, len (items)+2))),
        'yaxis': yaxis, 'mult': mult}
 
     colors = ['oceanblue', 'yellowgreen', 'orange', 'tan2', 'green', 'darkblue',
@@ -98,14 +99,19 @@ def format_chart_data (keys, data_table, aggregate=True):
     return chart_data
 
 
-def generate_chart (pls_file, chart_data):
+def generate_chart (pls_file):
     # start ploticus
-    p = subprocess.Popen (["ploticus", "-font", "FreeSans", "-png", "-o", "stdout", pls_file],
+    imgname = os.tmpnam ()
+
+    p = subprocess.Popen (["ploticus", "-font", "FreeSans", "-png", "-o", imgname, pls_file],
                           env={"GDFONTPATH": os.getcwd ()},
                           stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-    stdout, stderr = p.communicate (input=chart_data)
+    stdout, stderr = p.communicate ()
     if p.returncode == 0:
-        return stdout
+        with open (imgname, 'rb') as fd:
+            data = fd.read ()
+        os.unlink (imgname)
+        return data
     else:
         return None
 

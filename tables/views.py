@@ -153,8 +153,8 @@ def chart_tables (request, kind):
     mult, suffix = charts.data_multiplier (data_table, binary=binary)
     
     pls_file = charts.generate_pls (items=keys, title=title + (" for %s" % period_name),
-                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True)
-    image = charts.generate_chart (pls_file, chart_data)
+                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True, data=chart_data)
+    image = charts.generate_chart (pls_file)
 
     if image == None:
         raise Http404
@@ -194,8 +194,8 @@ def chart_table (request, table, kind):
     mult, suffix = charts.data_multiplier (data_table, binary=binary)
 
     pls_file = charts.generate_pls (items=keys, title=title + (" for %s" % period_name),
-                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True, color_idx=color)
-    image = charts.generate_chart (pls_file, chart_data)
+                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True, color_idx=color, data=chart_data)
+    image = charts.generate_chart (pls_file)
 
     if image == None:
         raise Http404
@@ -230,8 +230,8 @@ def chart_table_cfs (request, table, kind):
     mult, suffix = charts.data_multiplier (data_table, binary=binary)
 
     pls_file = charts.generate_pls (items=keys, title=title + (" for %s" % period_name),
-                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True)
-    image = charts.generate_chart (pls_file, chart_data)
+                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True, data=chart_data)
+    image = charts.generate_chart (pls_file)
 
     if image == None:
         raise Http404
@@ -267,8 +267,8 @@ def chart_cf (request, table, cf, kind):
     mult, suffix = charts.data_multiplier (data_table, binary=binary)
 
     pls_file = charts.generate_pls (items=keys, title=title + (" for %s" % period_name),
-                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True, color_idx=color)
-    image = charts.generate_chart (pls_file, chart_data)
+                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True, color_idx=color, data=chart_data)
+    image = charts.generate_chart (pls_file)
 
     if image == None:
         raise Http404
