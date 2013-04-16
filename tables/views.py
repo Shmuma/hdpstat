@@ -202,6 +202,42 @@ def chart_table (request, table, kind):
     resp.write (image)
     os.unlink (pls_file)
     return resp
+
+
+def chart_table_cfs (request, table, kind):
+    """
+    Table CFs stacked chart chart
+    """
+    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
+
+    kinds = {'size':          ("CFs sizes", "Size", "B"),
+             'avgSize':       ("Avg CFs sizes", "Size", "B"),
+             'hfileCount':    ("HFiles count", "HFiles", ""),
+             'hfileCountAvg': ("Avg CFs HFiles", "HFiles", ""),
+             'hfileCountMax': ("Max CFs HFiles", "HFiles", "")}
+
+    if not kind in kinds:
+        raise Http404
+
+    title, yaxis, suff = kinds[kind]
+
+    title = title + " of %s" % table
+
+    keys, data_table = reports.get_cfs_chart_data (back_days, kind, table)
+    chart_data = charts.format_chart_data (keys, data_table)
+    mult, suffix = charts.data_multiplier (data_table)
+
+    pls_file = charts.generate_pls (items=keys, title=title + (" for %s" % period_name),
+                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True)
+    image = charts.generate_chart (pls_file, chart_data)
+
+    if image == None:
+        raise Http404
+
+    resp = HttpResponse (content_type='image/png')
+    resp.write (image)
+    os.unlink (pls_file)
+    return resp
     
     
 
@@ -213,6 +249,13 @@ def chart_details (request, view, kind):
 
 
 def chart_table_details (request, view, table, kind):
+    """
+    Display bunch of charts for tables
+    """
+    return render (request, "tables/chart_details.html", { 'url': reverse (view, args=(table, kind)) })
+
+
+def chart_cfs_table_details (request, view, table, kind):
     """
     Display bunch of charts for tables
     """

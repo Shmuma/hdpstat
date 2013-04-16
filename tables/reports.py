@@ -169,6 +169,51 @@ def get_tables_chart_data (back_days, table_sample_field, filter=None, table=Non
     return keys, data_table
 
 
+def get_cfs_chart_data (back_days, cf_sample_field, table, filter=None):
+    """
+    Builds list of tables and data for tables overview charts.
+    Accessor is applied to TableSample object to obtain numeric value
+    """
+    if back_days != None:
+        dt_limit = now () - datetime.timedelta (days=back_days)
+    else:
+        dt_limit = datetime.datetime (1970, 1, 1, tzinfo=utc)
+
+    data_table = {}
+    keys = []
+
+    for cf_obj in models.CF.objects.filter (table__name="webpages").order_by ('name'):
+        k = cf_obj.name
+        count = 0
+
+        sql = """select s.date, cs.""" + cf_sample_field + """ from tables_cfsample cs, 
+                 tables_sample s, tables_table t, tables_cf cf
+                 where cf.table_id = t.id and cs.sample_id = s.id and cf.id = cs.cf_id and 
+                 s.date >= %(date_limit)s and cs.cf_id = %(cf_id)s"""
+
+        args = { 'date_limit': dt_limit,  'cf_id': cf_obj.id }
+
+        cur = connection.cursor ()
+        cur.execute (sql, args)
+        for date, value in cur.fetchall ():
+            if value == None:
+                continue
+            count += 1
+            d = date.replace (minute=0, second=0, microsecond=0)
+
+            if not d in data_table:
+                data_table[d] = {}
+            if filter != None:
+                value = filter (value)
+            data_table[d][k] = value
+
+        if count > 0:
+            keys.append (k)
+
+    return keys, data_table
+
+
+
 def get_chart_period (period):
     """
     By named period, return pair of days number and human-readable period name

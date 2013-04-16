@@ -66,6 +66,32 @@
             <img src="{% url chart_table kind='hfileCountMax' table=name %}" class="" alt="" />
           </a>
         </div> 
+        <!-- CF stats -->
+        <div>
+          <a href="{% url chart_cfs_table_details view='chart_table_cfs' table=name kind='size' %}">
+            <img src="{% url chart_table_cfs kind='size' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_cfs_table_details view='chart_table_cfs' table=name kind='avgSize' %}">
+            <img src="{% url chart_table_cfs kind='avgSize' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_cfs_table_details view='chart_table_cfs' table=name kind='hfileCount' %}">
+            <img src="{% url chart_table_cfs kind='hfileCount' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_cfs_table_details view='chart_table_cfs' table=name kind='hfileCountAvg' %}">
+            <img src="{% url chart_table_cfs kind='hfileCountAvg' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_cfs_table_details view='chart_table_cfs' table=name kind='hfileCountMax' %}">
+            <img src="{% url chart_table_cfs kind='hfileCountMax' table=name %}" class="" alt="" />
+          </a>
+        </div> 
       </div> 
     </body>
 </html>
