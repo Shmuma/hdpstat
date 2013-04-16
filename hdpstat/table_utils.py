@@ -31,24 +31,39 @@ class LargeNumberColumn (tables.Column):
 
 
     @staticmethod
-    def best_suffix_and_mul (value):
+    def best_suffix_and_mul (value, binary=True):
         # maps power of 10 to apropriate suffix
-        power_to_suffix = {
-            3: 'K',
-            6: 'M',
-            9: 'G',
-            12: 'T',
-            15: 'P',
-            18: 'E',
-            21: 'Z',
-            24: 'Y',
-            1000: 'inf'}
+        if binary:
+            base = 2
+
+            power_to_suffix = {
+                10: 'K',
+                20: 'M',
+                30: 'G',
+                40: 'T',
+                50: 'P',
+                60: 'E',
+                70: 'Z',
+                80: 'Y',
+                1000: 'inf'}
+        else:
+            base = 10
+            power_to_suffix = {
+                3: 'K',
+                6: 'M',
+                9: 'G',
+                12: 'T',
+                15: 'P',
+                18: 'E',
+                21: 'Z',
+                24: 'Y',
+                1000: 'inf'}           
 
         prev_power = 0
         prev_suffix = ''
         for power in sorted (power_to_suffix.keys ()):
-            if value < pow (10, power):
-                return (1.0 / pow (10, prev_power), prev_suffix)
+            if value < pow (base, power):
+                return (1.0 / pow (base, prev_power), prev_suffix)
             prev_power = power
             prev_suffix = power_to_suffix[power]       
 

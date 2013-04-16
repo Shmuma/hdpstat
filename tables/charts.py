@@ -110,12 +110,12 @@ def generate_chart (pls_file, chart_data):
         return None
 
 
-def data_multiplier (data_table):
+def data_multiplier (data_table, binary=True):
     # obtain max value from data_table
     max_val = 0
     for arr in data_table.values ():
         max_val = max (arr.values () + [max_val])
 
-    return table_utils.LargeNumberColumn.best_suffix_and_mul (max_val)
+    return table_utils.LargeNumberColumn.best_suffix_and_mul (max_val, binary=binary)
 
 

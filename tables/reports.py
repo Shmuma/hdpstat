@@ -169,7 +169,7 @@ def get_tables_chart_data (back_days, table_sample_field, filter=None, table=Non
     return keys, data_table
 
 
-def get_cfs_chart_data (back_days, cf_sample_field, table, filter=None):
+def get_cfs_chart_data (back_days, cf_sample_field, table, filter=None, cf=None):
     """
     Builds list of tables and data for tables overview charts.
     Accessor is applied to TableSample object to obtain numeric value
@@ -184,6 +184,8 @@ def get_cfs_chart_data (back_days, cf_sample_field, table, filter=None):
 
     for cf_obj in models.CF.objects.filter (table__name="webpages").order_by ('name'):
         k = cf_obj.name
+        if cf != None and k != cf:
+            continue
         count = 0
 
         sql = """select s.date, cs.""" + cf_sample_field + """ from tables_cfsample cs, 

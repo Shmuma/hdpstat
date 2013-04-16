@@ -9,23 +9,53 @@
     <body>
       <h3>CF details of {{ table_name }}/{{ cf_name }} @ {{ sample_date }} </h3>
 
-      <p>
-      {% if prev_day %}
-      <a href="{% url cf_detail sample=prev_day.id table=table_name cf=cf_name %}">
-        {{prev_day.sample.date.date}}
-      </a>
-      {% endif %}
+      <div style="float: left;">
+        <div>
+          <p>
+            {% if prev_day %}
+            <a href="{% url cf_detail sample=prev_day.id table=table_name cf=cf_name %}">
+              {{prev_day.sample.date.date}}
+            </a>
+            {% endif %}
 
-      {% if next_day %}
-      <a href="{% url cf_detail sample=next_day.id table=table_name cf=cf_name %}">
-        {{next_day.sample.date.date}}</a>
-      {% endif %}
-      </p>
-
-      <p>
-        <div id="table">
-          {% render_table table %}
+            {% if next_day %}
+            <a href="{% url cf_detail sample=next_day.id table=table_name cf=cf_name %}">
+              {{next_day.sample.date.date}}</a>
+            {% endif %}
+          </p>
         </div>
-      </p>
+
+        <div>
+          <div id="table">
+            {% render_table table %}
+          </div>
+        </div>
+
+        <div>
+          <a href="{% url chart_cf_details view='chart_cf' table=table_name cf=cf_name kind='size' %}">
+            <img src="{% url chart_cf kind='size' table=table_name cf=cf_name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_cf_details view='chart_cf' table=table_name cf=cf_name kind='avgSize' %}">
+            <img src="{% url chart_cf kind='avgSize' table=table_name cf=cf_name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_cf_details view='chart_cf' table=table_name cf=cf_name kind='hfileCount' %}">
+            <img src="{% url chart_cf kind='hfileCount' table=table_name cf=cf_name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_cf_details view='chart_cf' table=table_name cf=cf_name kind='hfileCountAvg' %}">
+            <img src="{% url chart_cf kind='hfileCountAvg' table=table_name cf=cf_name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_cf_details view='chart_cf' table=table_name cf=cf_name kind='hfileCountMax' %}">
+            <img src="{% url chart_cf kind='hfileCountMax' table=table_name cf=cf_name %}" class="" alt="" />
+          </a>
+        </div> 
+      </div>
     </body>
 </html>

@@ -26,9 +26,12 @@ urlpatterns = patterns('',
                        url (r'hbase/_charts/tables/(?P<kind>\w+)$', 'tables.views.chart_tables', name="chart_tables"),
                        url (r'hbase/_charts/table/(?P<table>\w+)/(?P<kind>\w+)/$',  'tables.views.chart_table', name="chart_table"),
                        url (r'hbase/_charts/table_cfs/(?P<table>\w+)/(?P<kind>\w+)/$',  'tables.views.chart_table_cfs', name="chart_table_cfs"),
+                       url (r'hbase/_charts/cf/(?P<table>\w+)/(?P<cf>\w+)/(?P<kind>\w+)/$',  'tables.views.chart_cf', name="chart_cf"),
                        url (r'hbase/_charts/details/(?P<view>[^/]+)/(?P<kind>\w+)$', 'tables.views.chart_details', name="chart_details"),
                        url (r'hbase/_charts/details/(?P<view>[^/]+)/(?P<table>\w+)/(?P<kind>\w+)$', 'tables.views.chart_table_details', name="chart_table_details"),
                        url (r'hbase/_charts/cfs_details/(?P<view>[^/]+)/(?P<table>\w+)/(?P<kind>\w+)$', 'tables.views.chart_cfs_table_details', name="chart_cfs_table_details"),
+                       url (r'hbase/_charts/cf_details/(?P<view>[^/]+)/(?P<table>\w+)/(?P<cf>\w+)/(?P<kind>\w+)$', 'tables.views.chart_cf_details', name="chart_cf_details"),
+                       
                        
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),
