@@ -9,25 +9,63 @@
     <body>
       <h3>{{ name }} @ {{ sample_date }} </h3>
 
-      <p>
-      {% if prev_day %}
-      <a href="{% url table_detail sample=prev_day.id table=name %}">{{prev_day.sample.date.date}}</a>
-      {% endif %}
+      <div style="float: left;">
+        <div>
+          <p>
+            {% if prev_day %}
+            <a href="{% url table_detail sample=prev_day.id table=name %}">{{prev_day.sample.date.date}}</a>
+            {% endif %}
 
-      {% if next_day %}
-      <a href="{% url table_detail sample=next_day.id table=name %}">{{next_day.sample.date.date}}</a>
-      {% endif %}
-      </p>
+            {% if next_day %}
+            <a href="{% url table_detail sample=next_day.id table=name %}">{{next_day.sample.date.date}}</a>
+            {% endif %}
+          </p>
+        </div> 
 
-      <p>
-        <div id="table">
-          {% render_table table %}
-        </div>
-      </p>
-      <p>
-        <div id="table">
-          {% render_table cf_table %}
-        </div>
-      </p>
+        <div>
+          <div id="table">
+            {% render_table table %}
+          </div>
+          <div id="table">
+            {% render_table cf_table %}
+          </div>
+        </div> 
+
+        <div>
+          <a href="{% url chart_table_details view='chart_table' table=name kind='size' %}">
+            <img src="{% url chart_table kind='size' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_table_details view='chart_table' table=name kind='regions' %}">
+            <img src="{% url chart_table kind='regions' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_table_details view='chart_table' table=name kind='regionSizeAvg' %}">
+            <img src="{% url chart_table kind='regionSizeAvg' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_table_details view='chart_table' table=name kind='hfileCount' %}">
+            <img src="{% url chart_table kind='hfileCount' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_table_details view='chart_table' table=name kind='oldestHFile' %}">
+            <img src="{% url chart_table kind='oldestHFile' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_table_details view='chart_table' table=name kind='hfileCountAvg' %}">
+            <img src="{% url chart_table kind='hfileCountAvg' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+        <div>
+          <a href="{% url chart_table_details view='chart_table' table=name kind='hfileCountMax' %}">
+            <img src="{% url chart_table kind='hfileCountMax' table=name %}" class="" alt="" />
+          </a>
+        </div> 
+      </div> 
     </body>
 </html>

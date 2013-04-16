@@ -2,7 +2,7 @@ import os
 import subprocess
 from hdpstat import table_utils
 
-def generate_pls (items, title, yaxis, mult=1, suffix="", area=True):
+def generate_pls (items, title, yaxis, mult=1, suffix="", area=True, color_idx=None):
     """
     Produce ploticus script for area plot. Return filename of produced pls
     """
@@ -42,11 +42,15 @@ def generate_pls (items, title, yaxis, mult=1, suffix="", area=True):
 """ % {'title': title, 'item_indices': ",".join (map (str, range (2, len (items)+2))),
        'yaxis': yaxis, 'mult': mult}
 
-    colors = ['red', 'yellowgreen', 'orange', 'yellow', 'green', 'darkblue',
-              'purple', 'oceanblue', 'coral', 'gray(0.3)', 'teal', 'magenta', 'skyblue',
+    colors = ['oceanblue', 'yellowgreen', 'orange', 'tan2', 'green', 'darkblue',
+              'purple', 'red', 'coral', 'gray(0.3)', 'teal', 'magenta', 'skyblue',
               'lightorange', 'tan1', 'lavender', 'pink']
 
     for i, item in enumerate (reversed (items)):
+        if color_idx == None:
+            color = colors[i]
+        else:
+            color = colors[color_idx]
         data += """
 #proc lineplot
   xfield: 1
@@ -54,13 +58,13 @@ def generate_pls (items, title, yaxis, mult=1, suffix="", area=True):
   legendlabel: %(label)s
 """ % {'index': 1+len (items) - i, 'label': item}
         if area:
-            data += "fill: %s\n" % colors[i]
+            data += "fill: %s\n" % color
         else:
-            data += "linedetails: color=%s\n" % colors[i]
+            data += "linedetails: color=%s\n" % color
 
         
-
-    data += """
+    if len (items) > 1:
+        data += """
 #proc legend
       location: min+0.5 max+0.4
 """

@@ -123,7 +123,7 @@ def get_cf_navigations (dt_now, table, cf):
     return (prev_day, next_day)
 
 
-def get_tables_chart_data (back_days, table_sample_field, filter=None):
+def get_tables_chart_data (back_days, table_sample_field, filter=None, table=None):
     """
     Builds list of tables and data for tables overview charts.
     Accessor is applied to TableSample object to obtain numeric value
@@ -136,8 +136,10 @@ def get_tables_chart_data (back_days, table_sample_field, filter=None):
     data_table = {}
     keys = []
 
-    for table in models.Table.objects.order_by ("name"):
-        k = table.name
+    for table_obj in models.Table.objects.order_by ("name"):
+        k = table_obj.name
+        if table != None and table != k:
+            continue
         count = 0
 
         sql = """select s.date, ts.""" + table_sample_field + """ from tables_tablesample ts, 
@@ -145,7 +147,7 @@ def get_tables_chart_data (back_days, table_sample_field, filter=None):
                  where ts.table_id = t.id and ts.sample_id = s.id and s.date >= %(date_limit)s and 
                  t.name = %(table)s"""
 
-        args = { 'date_limit': dt_limit,  'table': table.name }
+        args = { 'date_limit': dt_limit,  'table': k }
 
         cur = connection.cursor ()
         cur.execute (sql, args)

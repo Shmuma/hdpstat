@@ -133,11 +133,11 @@ def chart_tables (request, kind):
     """
     now = timezone.now ()
 
-    kinds = {'size':          ("Size of tables for %s", "Size", "B", True, None),
-             'regionSizeAvg': ("Average size of regions for %s", "Size", "B", True, None),
-             'regions':       ("Regions count for %s", "Regions", "", True, None),
-             'hfileCount':    ("HFiles count for %s", "HFiles", "", True, None),
-             'oldestHFile':   ("Max age of HFiles for %s", "Days", "", False,
+    kinds = {'size':          ("Size of tables", "Size", "B", True, None),
+             'regionSizeAvg': ("Average size of regions", "Size", "B", True, None),
+             'regions':       ("Regions count", "Regions", "", True, None),
+             'hfileCount':    ("HFiles count", "HFiles", "", True, None),
+             'oldestHFile':   ("Max age of HFiles", "Days", "", False,
                                lambda oldest: reports.dt_minus_date (now, oldest).total_seconds () / 86400.0)}
 
     if not kind in kinds:
@@ -151,7 +151,7 @@ def chart_tables (request, kind):
     chart_data = charts.format_chart_data (keys, data_table, aggregate=aggr)
     mult, suffix = charts.data_multiplier (data_table)
     
-    pls_file = charts.generate_pls (items=keys, title=title % period_name,
+    pls_file = charts.generate_pls (items=keys, title=title + (" for %s" % period_name),
                                     yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True)
     image = charts.generate_chart (pls_file, chart_data)
 
@@ -164,8 +164,56 @@ def chart_tables (request, kind):
     return resp
 
 
+def chart_table (request, table, kind):
+    """
+    Table details chart
+    """
+    back_days, period_name = reports.get_chart_period (request.GET.get ('period', '2weeks'))
+    now = timezone.now ()
+
+    kinds = {'size':          ("Size", "Size", "B", True, None, 0),
+             'regionSizeAvg': ("Average region size", "Size", "B", True, None, 1),
+             'regions':       ("Regions count", "Regions", "", True, None, 2),
+             'hfileCount':    ("HFiles count", "HFiles", "", True, None, 3),
+             'oldestHFile':   ("Oldest HFile age", "Days", "", False,
+                               lambda oldest: reports.dt_minus_date (now, oldest).total_seconds () / 86400.0, 4),
+             'hfileCountAvg': ("Avg reg HFile", "HFiles", "", True, None, 5),
+             'hfileCountMax': ("Max reg HFile", "HFiles", "", True, None, 6)}
+
+    if not kind in kinds:
+        raise Http404
+
+    title, yaxis, suff, aggr, filter, color = kinds[kind]
+
+    title = title + " of %s" % table
+
+    keys, data_table = reports.get_tables_chart_data (back_days, kind, table=table, filter=filter)
+    chart_data = charts.format_chart_data (keys, data_table, aggregate=aggr)
+    mult, suffix = charts.data_multiplier (data_table)
+
+    pls_file = charts.generate_pls (items=keys, title=title + (" for %s" % period_name),
+                                    yaxis=yaxis, mult=mult, suffix=suffix+suff, area=True, color_idx=color)
+    image = charts.generate_chart (pls_file, chart_data)
+
+    if image == None:
+        raise Http404
+
+    resp = HttpResponse (content_type='image/png')
+    resp.write (image)
+    os.unlink (pls_file)
+    return resp
+    
+    
+
 def chart_details (request, view, kind):
     """
     Display bunch of charts for tables
     """
     return render (request, "tables/chart_details.html", { 'url': reverse (view, args=(kind,)) })
+
+
+def chart_table_details (request, view, table, kind):
+    """
+    Display bunch of charts for tables
+    """
+    return render (request, "tables/chart_details.html", { 'url': reverse (view, args=(table, kind)) })

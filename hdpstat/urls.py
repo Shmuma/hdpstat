@@ -24,7 +24,9 @@ urlpatterns = patterns('',
                        url (r'hbase/(?P<table>\w+)/(?P<cf>\w+)$', 'tables.views.cf_detail_view'),
 
                        url (r'hbase/_charts/tables/(?P<kind>\w+)$', 'tables.views.chart_tables', name="chart_tables"),
-                       url (r'hbase/_charts/details/(?P<view>.+)/(?P<kind>.+)$', 'tables.views.chart_details', name="chart_details"),
+                       url (r'hbase/_charts/table/(?P<table>\w+)/(?P<kind>\w+)/$',  'tables.views.chart_table', name="chart_table"),
+                       url (r'hbase/_charts/details/(?P<view>[^/]+)/(?P<kind>\w+)$', 'tables.views.chart_details', name="chart_details"),
+                       url (r'hbase/_charts/details/(?P<view>[^/]+)/(?P<table>\w+)/(?P<kind>\w+)$', 'tables.views.chart_table_details', name="chart_table_details"),
                        
     # Examples:
     # url(r'^$', 'hdpstat.views.home', name='home'),
