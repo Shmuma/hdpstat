@@ -182,7 +182,7 @@ def get_cfs_chart_data (back_days, cf_sample_field, table, filter=None, cf=None)
     data_table = {}
     keys = []
 
-    for cf_obj in models.CF.objects.filter (table__name="webpages").order_by ('name'):
+    for cf_obj in models.CF.objects.filter (table__name=table).order_by ('name'):
         k = cf_obj.name
         if cf != None and k != cf:
             continue

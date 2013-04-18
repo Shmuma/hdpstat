@@ -226,6 +226,7 @@ def chart_table_cfs (request, table, kind):
     title = title + " of %s" % table
 
     keys, data_table = reports.get_cfs_chart_data (back_days, kind, table)
+
     chart_data = charts.format_chart_data (keys, data_table)
     mult, suffix = charts.data_multiplier (data_table, binary=binary)
 

@@ -71,6 +71,7 @@ class LargeNumberColumn (tables.Column):
     @staticmethod
     def format (value):
         mul, suff = LargeNumberColumn.best_suffix_and_mul (value)
+#        print value, mul, float (value) * mul
         return "%.2f%s" % (float (value) * mul , suff)
 
 

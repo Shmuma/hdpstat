@@ -8,7 +8,7 @@ import datetime
 import subprocess
 
 from django.core.management.base import BaseCommand
-from django.utils.timezone import utc
+from django.utils.timezone import utc, now
 from tables import models
 
 
@@ -109,7 +109,7 @@ class Command (BaseCommand):
     def handle (self, *args, **options):
         data = self._get_data (args)
         tables = {}
-        dt = datetime.datetime.now ().replace (tzinfo=utc)
+        dt = now ()
 
         for l in data:
             l = l.strip ()
