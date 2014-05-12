@@ -10,9 +10,9 @@ from models import TaskInstance, CounterValue, Counter, CounterGroup
 
 def get_resource_counter_ids ():
     """
-    Lookup IDs of MAP_WALL_CLOCK_MS and REDUCE_WALL_CLOCK_MS counters. Return them in a tuple
+    Lookup IDs of SLOTS_MILLIS_MAPS and SLOTS_MILLIS_REDUCES counters. Return them in a tuple
     """
-    return (Counter.objects.get (tag="MAP_WALL_CLOCK_MS").id, Counter.objects.get (tag="REDUCE_WALL_CLOCK_MS").id)
+    return (Counter.objects.get (tag="SLOTS_MILLIS_MAPS").id, Counter.objects.get (tag="SLOTS_MILLIS_REDUCES").id)
 
 
 def get_jobs_resource_usages (map_counter_id, red_counter_id, where_part="1=1", query_args=None):

@@ -59,8 +59,8 @@ class JobsTable_Time (JobsTableBase, tables.Table):
     class Meta:
         attrs = {"class": "paleblue"}
 
-    MAP_WALL_CLOCK_MS = table_utils.LargeNumberColumn (verbose_name="Mapper seconds", divider=1000)
-    REDUCE_WALL_CLOCK_MS = table_utils.LargeNumberColumn (verbose_name="Reducer seconds", divider=1000) 
+    SLOTS_MILLIS_MAPS = table_utils.LargeNumberColumn (verbose_name="Mapper seconds", divider=1000)
+    SLOTS_MILLIS_REDUCES = table_utils.LargeNumberColumn (verbose_name="Reducer seconds", divider=1000)
 
 
 class JobsTable_TaskIO (JobsTableBase, tables.Table):
