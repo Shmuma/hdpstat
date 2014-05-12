@@ -32,7 +32,7 @@ class HadoopWatcher (object):
         Checks directories for new and modified files. Returns list of new/changed JobEnties
         """
         running = self._process_dir (self.running_dir, self.running_entries)
-        done = self._process_dir (self.done_dir, self.done_entries)
+        done = self._process_dir (self.done_dir, self.done_entries, recurse=True)
 
         return running + done
 
@@ -85,21 +85,26 @@ class HadoopWatcher (object):
         Extracts job prefix from full file name
         """
         dname, fname = os.path.split (path)
-        mo = re.search ("(([^_]+_){5})", fname)
+        mo = re.search ("(([^_]+_){3})", fname)
         if mo:           
             prefix = mo.group (1)[:-1]
             return os.path.join (dname, prefix)
         return None
 
 
-    def _process_dir (self, dir, entries):
+    def _process_dir (self, dir, entries, recurse=False):
         untouched = set (entries.keys ())
         fresh = []
-
         # find all files in directory, sort them and find xml-counter pair
-        files = glob.glob ("%s/*" % dir)
+        if recurse:
+            files = []
+            for path, dirnames, fnames in os.walk(dir):
+                for f in fnames:
+                    if f.startswith("job_"):
+                        files.append(os.path.join(path, f))
+        else:
+            files = glob.glob ("%s/*" % dir)
         files.sort ()
-
         prev_name = None
         xml_name = None
         counter_name = None
@@ -111,7 +116,6 @@ class HadoopWatcher (object):
                 prefix = self._job_prefix (f)
                 if prefix:                   
                     xml_prefix.add (prefix)
-
         # second pass, find all counter names for which xml exists
         for f in files:
             if not f.endswith ("_conf.xml"):

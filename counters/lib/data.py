@@ -69,7 +69,7 @@ class CounterDataImporter (object):
         taskName = jobInfo.vals.get ('JOBNAME', "")
 
         taskGroup = TaskGroup.objects.get_or_create (name=tasks.classify (taskName))[0]
-        task = Task.objects.get_or_create (name=taskName, taskGroup=taskGroup)[0]
+        task = Task.objects.get_or_create (name=taskName[:250], taskGroup=taskGroup)[0]
 
         taskData = {
             'task': task,
