@@ -137,6 +137,7 @@ INSTALLED_APPS = (
     'django_tables2',
     'counters',
     'tables',
+    'probes',
 )
 
 # A sample logging configuration. The only tangible logging
