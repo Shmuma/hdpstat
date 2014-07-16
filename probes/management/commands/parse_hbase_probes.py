@@ -36,12 +36,28 @@ class Command (BaseCommand):
                 server, region, time = items
 
                 # push probe data into our averaging system
-                processor.process(server, region, long(time))
+                anomaly = processor.process(server, region, long(time))
+                if anomaly:
+                    self._handle_anomaly(anomaly)
                 probes_count += 1
             except Exception as e:
                 self.stderr.write("Error process line, skipped: %s\n" % e)
+                alert = model.HBase_Alert(0, "Error", "Exception processing line '%s'"  % l,
+                                          str(e))
                 lines_skipped += 1
 
         # check servers for anomalies
-        processor.check_servers ()
+        for anomaly in processor.check_servers ():
+            self._handle_anomaly(anomaly)
+
         self.stdout.write("Processed %d probes, %d lines skipped\n" % (probes_count, lines_skipped))
+
+
+    def _handle_anomaly (self, anomaly):
+        if anomaly.is_region:
+            kind = 2
+        else:
+            kind = 1
+        alert = models.HBase_Alert(kind=kind, objname=anomaly.object_name,
+                                   text=anomaly.text, description=anomaly.description)
+        alert.save()

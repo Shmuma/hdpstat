@@ -1,5 +1,7 @@
 from django.db import models
 
+from lib.sliding_averager import SlidingWindowAverager, SlidingWindowAveragerState
+
 
 class HBase_Region (models.Model):
     name = models.CharField (max_length=10240)
@@ -31,16 +33,44 @@ class HBase_Server (models.Model):
     name = models.CharField (max_length=128, unique=True)
 
 
-class HBase_ServerTime (models.Model):
-    server = models.ForeignKey(HBase_Server)
-    time = models.FloatField ()
-    probes = models.PositiveSmallIntegerField()
+class TimeProbesHolder (models.Model):
+    """
+    Abstract common parent for ServerTime and RegionTime models
+    """
+    time = models.FloatField (default=0.0)
+    probes = models.PositiveSmallIntegerField(default=0)
+    half_time = models.FloatField (default=0.0)
+    half_probes = models.PositiveSmallIntegerField(default=0)
+
+    def get_avg_state (self):
+        return SlidingWindowAveragerState(self.time*self.probes, self.probes, self.half_time*self.half_probes, self.half_probes)
+
+    def set_avg_state (self, state):
+        if state.full_count > 0:
+            self.time = state.full_sum / state.full_count
+            self.probes = state.full_count
+        else:
+            self.time = 0.0
+            self.probes = 0
+        if state.half_count > 0:
+            self.half_time = state.half_sum / state.half_count
+            self.half_probes = state.half_count
+        else:
+            self.half_time = 0.0
+            self.half_count = 0
+        
+    averager_state = property(get_avg_state, set_avg_state)
+    
+    class Meta:
+        abstract = True
 
 
-class HBase_RegionTime (models.Model):
-    region = models.ForeignKey (HBase_Region)  
-    time = models.FloatField ()
-    probes = models.PositiveSmallIntegerField()
+class HBase_ServerTime (TimeProbesHolder):
+    server = models.ForeignKey(HBase_Server, unique=True)
+
+
+class HBase_RegionTime (TimeProbesHolder):
+    region = models.ForeignKey (HBase_Region, unique=True)  
 
 
 class HBase_LastProbe (models.Model):
@@ -58,7 +88,8 @@ class HBase_Alert (models.Model):
         )
     
     kind = models.PositiveIntegerField (choices=KINDS)
-    date = models.DateTimeField ()
+    date = models.DateTimeField (auto_now_add=True)
+    objname = models.CharField (max_length=128)
     text  = models.CharField (max_length=128)
     description = models.TextField (max_length=1024)
     
