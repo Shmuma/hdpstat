@@ -1,0 +1,29 @@
+Probe series read
+========================================================
+
+Here we read series of probes into one large dataframe for later analisys
+
+```{r}
+source("probe_io.R")
+```
+
+Deduct probe date from file name
+```{r}
+probe_date("data/2014-08-07_02.txt")
+```
+
+Read list of files into one large data frame
+```{r}
+  df <- read_probes(c("data/2014-08-07_02.txt"))
+  summary(df)
+```
+
+Read data for two days:
+```{r}
+  system.time(df <- read_probes(c("data/2014-08-06_08.txt", "data/2014-08-06_20.txt", "data/2014-08-07_02.txt",
+                                  "data/2014-08-05_01.txt", "data/2014-08-06_02.txt", "data/2014-08-05_11.txt",
+                                  "data/2014-08-05_07.txt", "data/2014-08-05_04.txt", "data/2014-08-05_16.txt")))
+  summary(df)
+```
+
+

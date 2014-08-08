@@ -1,0 +1,59 @@
+Test of probe reading
+======================
+This document is an example and test code for probe reading. Normally, it will read one probe sample, which consists from list of regions with their regionserver and probe time.
+
+```{r}
+source ("probe_io.R")
+library(plyr)
+```
+
+This code reads probe data into data frame
+```{r cache=TRUE}
+df <- read_probe("data/2014-08-07_02.txt")
+summary(df)
+str(df)
+```
+
+Group reply time by regionserver and average
+```{r}
+d <- ddply(df, .(RS), summarise, time=mean(Time), count=length(Time))
+# order by mean time
+od <- d[order(d$time, decreasing=T),]
+head(od, n=20)
+```
+
+Plots of regions in top-10 regionservers
+```{r}
+for (i in seq(10)) {
+  a <- df[df$RS == od[i, "RS"],]
+  plot(a$Time, type='l', main=od[i, "RS"])
+}
+```
+
+
+Group reply time by regionserver and max
+```{r}
+dm <- ddply(df, .(RS), summarise, time=max(Time), count=length(Time))
+odm <- dm[order(dm$time, decreasing=T),]
+head(odm, n=20)
+```
+
+Top-20 regions by time
+```{r}
+odf <- df[order(df$Time, decreasing=T),]
+head(odf, n=20)
+```
+
+Optimization
+---------------------
+Initial implementation of read_probe is not too great.
+
+    system.time(df <- read_probe("data/2014-08-07_02.txt"))
+     user  system elapsed 
+     3.42    0.00    3.41 
+
+The source of slowdown is the need to parse line-by-line. After switch to tab-separated format:
+
+    system.time(df2 <- read_probe_tabs("data/2014-08-07_02-tabs.txt"))
+     user  system elapsed 
+     0.276   0.000   0.272
