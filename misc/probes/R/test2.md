@@ -11,17 +11,17 @@ source("probe_io.R")
 Deduct probe date from file name
 
 ```r
-probe_date("data/2014-08-07_02.txt")
+probe_date("data/2014-08-07_02.txt", semicolon=T)
 ```
 
 ```
-## [1] "2014-08-07 02:00:00"
+## Error: unused argument (semicolon = T)
 ```
 
 Read list of files into one large data frame
 
 ```r
-  df <- read_probes(c("data/2014-08-07_02.txt"))
+  df <- read_probes(c("data/2014-08-07_02.txt"), semicolon=T)
   summary(df)
 ```
 
@@ -57,12 +57,13 @@ Read data for two days:
 ```r
   system.time(df <- read_probes(c("data/2014-08-06_08.txt", "data/2014-08-06_20.txt", "data/2014-08-07_02.txt",
                                   "data/2014-08-05_01.txt", "data/2014-08-06_02.txt", "data/2014-08-05_11.txt",
-                                  "data/2014-08-05_07.txt", "data/2014-08-05_04.txt", "data/2014-08-05_16.txt")))
+                                  "data/2014-08-05_07.txt", "data/2014-08-05_04.txt", "data/2014-08-05_16.txt"),
+                                semicolon=T))
 ```
 
 ```
 ##    user  system elapsed 
-##   3.392   0.012   3.409
+##   4.088   0.072   3.760
 ```
 
 ```r

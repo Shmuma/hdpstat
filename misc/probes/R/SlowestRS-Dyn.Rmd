@@ -1,0 +1,83 @@
+Slowest RS dynamics
+========================================================
+
+Here we try to find slowest (or bunch of slowest regionservers and look into their response change over time). I haven't used all available data, only two-three days, not more.
+
+```{r}
+source ("probe_io.R")
+library(plyr)
+```
+
+```{r}
+from_date <- as.POSIXct("2014-07-21")
+to_date <- as.POSIXct("2014-08-05")
+```
+
+Data range for analisys `r from_date` -- `r to_date`, load it:
+```{r}
+  # add one day to upper bound
+  to_date <- to_date + 24*60*60
+  files <- c()  
+  for (file in list.files("data", full.names=T)) {
+    d <- probe_date(file)
+    if (d >= from_date && d <= to_date) {
+      files <- append(files, file)
+    }
+  }
+
+  str(files)
+```
+
+Get slowest regionservers on first probe (file `r files[1]`)
+
+```{r}
+read_rs_mean_ord <- function(fname) {
+  first <- read_probe(fname, semicolon=T)
+  first_rs_mean <- ddply(first, .(RS), summarise, time=mean(Time))
+  first_rs_mean[order(first_rs_mean$time, decreasing=T),]
+}
+
+ord_first <- read_rs_mean_ord(files[1])
+head(ord_first, n=20)
+plot(ord_first$time, type='l')
+```
+
+Get list of slowest regionservers over time
+```{r}
+slow_rses_over_time <- NULL
+rs_times <- NULL
+
+for (file in files) {
+  ord <- read_rs_mean_ord(file)
+  date <- probe_date(file)
+  slow_rses_over_time <- rbind(slow_rses_over_time,
+                               data.frame(date=date, rs=ord[1,]$RS, time=ord[1,]$time))
+  rs_times <- rbind(rs_times,
+                    cbind(date=date, ord))
+}
+
+head(slow_rses_over_time)
+```
+
+Hmm, in slowest list we have lots of the same regionservers:
+```{r}
+rses_count <- ddply(slow_rses_over_time, .(rs), summarise, count=length(rs))
+rses_count <- rses_count[order(rses_count$count, decreasing=T),]
+head(rses_count)
+```
+
+So, it's clear that slowest RS are not random, let's look on their benchmark over time.
+
+```{r}
+# take first and second most frequent slow rs regionservers
+rs_1 <- rses_count$rs[1]
+rs_2 <- rses_count$rs[2]
+# take one RS which haven't been in slowest
+rs_ok <- setdiff(rs_times$RS, rses_count$rs)[2]
+plot(rs_times[rs_times$RS == rs_1, c('date', 'time')], type='l', col='red')
+lines(rs_times[rs_times$RS == rs_2, c('date', 'time')], type='l', col='blue')
+lines(rs_times[rs_times$RS == rs_ok, c('date', 'time')], type='l', col='black')
+
+```
+
+It looks like an effect caused by lack of compaction.

@@ -188,15 +188,15 @@ hljs.initHighlightingOnLoad();
 
 <p>Deduct probe date from file name</p>
 
-<pre><code class="r">probe_date(&quot;data/2014-08-07_02.txt&quot;)
+<pre><code class="r">probe_date(&quot;data/2014-08-07_02.txt&quot;, semicolon=T)
 </code></pre>
 
-<pre><code>## [1] &quot;2014-08-07 02:00:00&quot;
+<pre><code>## Error: unused argument (semicolon = T)
 </code></pre>
 
 <p>Read list of files into one large data frame</p>
 
-<pre><code class="r">  df &lt;- read_probes(c(&quot;data/2014-08-07_02.txt&quot;))
+<pre><code class="r">  df &lt;- read_probes(c(&quot;data/2014-08-07_02.txt&quot;), semicolon=T)
   summary(df)
 </code></pre>
 
@@ -230,11 +230,12 @@ hljs.initHighlightingOnLoad();
 
 <pre><code class="r">  system.time(df &lt;- read_probes(c(&quot;data/2014-08-06_08.txt&quot;, &quot;data/2014-08-06_20.txt&quot;, &quot;data/2014-08-07_02.txt&quot;,
                                   &quot;data/2014-08-05_01.txt&quot;, &quot;data/2014-08-06_02.txt&quot;, &quot;data/2014-08-05_11.txt&quot;,
-                                  &quot;data/2014-08-05_07.txt&quot;, &quot;data/2014-08-05_04.txt&quot;, &quot;data/2014-08-05_16.txt&quot;)))
+                                  &quot;data/2014-08-05_07.txt&quot;, &quot;data/2014-08-05_04.txt&quot;, &quot;data/2014-08-05_16.txt&quot;),
+                                semicolon=T))
 </code></pre>
 
 <pre><code>##    user  system elapsed 
-##   3.392   0.012   3.409
+##   4.088   0.072   3.760
 </code></pre>
 
 <pre><code class="r">  summary(df)
