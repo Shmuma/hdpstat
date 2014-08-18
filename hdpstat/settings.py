@@ -138,6 +138,7 @@ INSTALLED_APPS = (
     'counters',
     'tables',
     'probes',
+    'hbase',
 )
 
 # A sample logging configuration. The only tangible logging
