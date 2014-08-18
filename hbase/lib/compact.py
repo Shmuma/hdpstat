@@ -1,6 +1,7 @@
 import urllib2
 import json
 import datetime
+import os
 
 """
 Module provides routine to fetch, parse and store RS compaction state which can be obtained from
@@ -37,6 +38,9 @@ class CompactionState (object):
         if dvals[0] == "Compacting" and len(dvals) == 4:
             store = dvals[1]
             reg = dvals[3]
+        else:
+            # flusing, open-close, etc
+            return None
 
         return cls(rs, json['starttimems']/1000.0, reg, store, json["state"])
         
@@ -57,5 +61,23 @@ def server_compactions(server):
     """
     comp_json = fetch_compaction_json(server)
     data = json.loads(comp_json)
-    return map(lambda j: CompactionState.from_json_obj(server, j), data)
+    res = []
+    for obj in data:
+        state = CompactionState.from_json_obj(server, obj)
+        if state:
+            res.append(state)
+    return res
 
+
+
+def region_compaction_path(region):
+    """
+    By region name get temporary compaction location
+    """
+    items = region.split(",")
+    table = items[0]
+    key = ",".join(items[1:-1])
+    rest = items[-1]
+    items = rest.split(".")
+    h = items[1]
+    return os.path.join("/hbase", table, h, ".tmp")
