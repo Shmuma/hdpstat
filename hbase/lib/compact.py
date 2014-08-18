@@ -3,6 +3,7 @@ import json
 import datetime
 import os
 
+import hdfs
 """
 Module provides routine to fetch, parse and store RS compaction state which can be obtained from
 /rs-status?format=json&filter=general
@@ -81,3 +82,19 @@ def region_compaction_path(region):
     items = rest.split(".")
     h = items[1]
     return os.path.join("/hbase", table, h, ".tmp")
+
+
+
+def paths_max_age(paths):
+    """
+    For list of HDFS paths get age of oldest file in that path.
+    Return is a dict with path -> datetime.timedelta mapping
+    """
+    for line in hdfs.paths_listing(*paths):
+        print line
+        entry = hdfs.ListingEntry.parse(line)
+        if entry:
+            print entry
+
+    res = {path: datetime.timedelta(seconds=0) for path in paths}
+    return res

@@ -11,7 +11,7 @@ def setup_logging():
 
 class Command (BaseCommand):
     hbase_conf_root = "/usr/local/hadoop/hbase-conf/hbase-conf-prd"
-    long_threshold = 60*60
+    long_threshold = 2*60
 
     def handle (self, *args, **options):
         setup_logging()
@@ -29,7 +29,7 @@ class Command (BaseCommand):
         for rs in rses:
             states = compact.server_compactions(rs)
             for s in states:
-                if s.age() > long_delta:
+                if s.age() > long_delta and s.state == "RUNNING":
                     logging.info("Long compact: %s", s)
                     long_compacts.append(s)
 
@@ -46,4 +46,9 @@ class Command (BaseCommand):
             paths[path] = l
 
         logging.info("Need to check %d HBase paths for stalled compactions", len(paths))
-        
+        paths_ages = compact.paths_max_age(paths.keys()[:10])
+        for path,age in paths_ages.iteritems():
+            print path, age
+            for comp in paths[path]:
+                print "\t", comp
+            
