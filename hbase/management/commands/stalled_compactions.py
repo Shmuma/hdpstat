@@ -49,7 +49,7 @@ class Command (BaseCommand):
                     long_compacts.append(s)
 
         if len(long_compacts) == 0:
-            logging.info("No compactions longer than %s detected, exit", long_delta)
+            logging.info("No compactions longer than %s detected, exit", threshold)
             return
 
         # check every long compact for stall conditions (take mtime from hdfs)
