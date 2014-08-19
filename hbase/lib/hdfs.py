@@ -36,6 +36,8 @@ class ListingEntry (object):
         """
         Parse one listing line to ListingEntry
         """
+        if len(line) == 0:
+            return None
         v = re.split("\s+", line)
         if len(v) != 8:
             logging.warn("hdfs.parse: Strange count of entries in listing - %d, expected 8. Line = %s",

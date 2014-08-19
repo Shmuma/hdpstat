@@ -90,11 +90,15 @@ def paths_max_age(paths):
     For list of HDFS paths get age of oldest file in that path.
     Return is a dict with path -> datetime.timedelta mapping
     """
+    now = datetime.datetime.now()
+    res = {path: datetime.timedelta(seconds=0) for path in paths}
+
     for line in hdfs.paths_listing(*paths):
-        print line
         entry = hdfs.ListingEntry.parse(line)
         if entry:
-            print entry
-
-    res = {path: datetime.timedelta(seconds=0) for path in paths}
+            d = os.path.dirname(entry.name)
+            if not d in res:
+                logging.warn("Got listing entry not present in query %s", d)
+            else:
+                res[d] = max(res[d], now-entry.date)
     return res

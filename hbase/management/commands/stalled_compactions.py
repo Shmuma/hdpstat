@@ -11,7 +11,8 @@ def setup_logging():
 
 class Command (BaseCommand):
     hbase_conf_root = "/usr/local/hadoop/hbase-conf/hbase-conf-prd"
-    long_threshold = 2*60
+    long_threshold = 20*60
+    stall_threshold = 20*60
 
     def handle (self, *args, **options):
         setup_logging()
@@ -47,8 +48,12 @@ class Command (BaseCommand):
 
         logging.info("Need to check %d HBase paths for stalled compactions", len(paths))
         paths_ages = compact.paths_max_age(paths.keys()[:10])
+        stall_delta = datetime.timedelta(seconds=self.stall_threshold)
+        stall_rses = set()
+
         for path,age in paths_ages.iteritems():
-            print path, age
-            for comp in paths[path]:
-                print "\t", comp
-            
+            if age > stall_delta:               
+                for comp in paths[path]:
+                    stall_rses.add(comp.rs)
+
+        logging.info("Stalled compactions found on %d regionservers: %s", len(stall_rses), ", ".join(sorted(stall_rses)))
