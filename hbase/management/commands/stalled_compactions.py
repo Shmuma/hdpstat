@@ -1,6 +1,8 @@
 import logging
 import datetime
 
+from optparse import make_option
+
 from django.core.management.base import BaseCommand, CommandError
 
 from hbase.lib.servers import regionservers
@@ -10,27 +12,39 @@ def setup_logging():
     logging.basicConfig (format="%(asctime)s: %(message)s", level=logging.INFO)
 
 class Command (BaseCommand):
-    hbase_conf_root = "/usr/local/hadoop/hbase-conf/hbase-conf-prd"
-    long_threshold = 20*60
-    stall_threshold = 20*60
+    option_list = BaseCommand.option_list + (
+        make_option("--conf-root", dest="conf_root",
+                    default="/usr/local/hadoop/hbase-conf/hbase-conf-prd",
+                    help="HBase configuration root path"),
+        make_option("--alert", dest="alert",
+                    action="store_true",
+                    help="Turn on alerting to monitoring by saving text file with result"),
+        make_option("--alert-path", dest="alert_path",
+                    default="/var/tmp/stalled_compacts",
+                    help="Text file with alert path"),
+        make_option("--threshold", dest="threshold",
+                    default=60,
+                    help="How long compaction must have no progress to be considered 'stalled', in minutes. Default is 60",
+                    type="int")
+        )
 
     def handle (self, *args, **options):
         setup_logging()
-        logging.info("Perform stalled compaction check")
+        logging.debug("Perform stalled compaction check")
 
-        rses = regionservers(self.hbase_conf_root)
+        rses = regionservers(options['conf_root'])
         if rses is None:
             logging.error("HBase configuration not found in %s", self.hbase_conf_root)
             return
         logging.info("Will query %d regionservers: [%s, %s, ...]", len(rses), rses[0], rses[1])
 
         long_compacts = []
-        long_delta = datetime.timedelta(seconds=self.long_threshold)
+        threshold = datetime.timedelta(minutes=options['threshold'])
 
         for rs in rses:
             states = compact.server_compactions(rs)
             for s in states:
-                if s.age() > long_delta and s.state == "RUNNING":
+                if s.age() > threshold and s.state == "RUNNING":
                     logging.info("Long compact: %s", s)
                     long_compacts.append(s)
 
@@ -47,13 +61,17 @@ class Command (BaseCommand):
             paths[path] = l
 
         logging.info("Need to check %d HBase paths for stalled compactions", len(paths))
-        paths_ages = compact.paths_max_age(paths.keys()[:10])
-        stall_delta = datetime.timedelta(seconds=self.stall_threshold)
+        paths_ages = compact.paths_max_age(paths.keys())
         stall_rses = set()
 
         for path,age in paths_ages.iteritems():
-            if age > stall_delta:               
+            if age > threshold:
                 for comp in paths[path]:
                     stall_rses.add(comp.rs)
 
         logging.info("Stalled compactions found on %d regionservers: %s", len(stall_rses), ", ".join(sorted(stall_rses)))
+
+        if options['alert']:
+            with open(options['alert_path'], 'w+') as fd:
+                if len(stall_rses) > 0:
+                    fd.write("Stalled compactions on %d RSes: %s\n" % (len(stall_rses), ", ".join(sorted(stall_rses))))
