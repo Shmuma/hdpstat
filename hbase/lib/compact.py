@@ -1,6 +1,7 @@
 import urllib2
 import json
 import datetime
+import logging
 import os
 
 import hdfs
@@ -64,12 +65,17 @@ def server_compactions(server):
     In case of error, apropriate exception thrown
     """
     comp_json = fetch_compaction_json(server)
-    data = json.loads(comp_json)
     res = []
-    for obj in data:
-        state = CompactionState.from_json_obj(server, obj)
-        if state:
-            res.append(state)
+    if len(comp_json) == 0:
+        return []
+    try:
+        data = json.loads(comp_json)
+        for obj in data:
+            state = CompactionState.from_json_obj(server, obj)
+            if state:
+                res.append(state)
+    except ValueError:
+        logging.error("Json parse error: '%s'", comp_json)
     return res
 
 
