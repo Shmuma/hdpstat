@@ -48,10 +48,13 @@ class CompactionState (object):
 
 
 def fetch_compaction_json(server):
-    url = "http://%s:60030/rs-status?format=json" % server
-    resp = urllib2.urlopen(url)
-    data = resp.read()
-    resp.close()
+    try:
+        url = "http://%s:60030/rs-status?format=json" % server
+        resp = urllib2.urlopen(url)
+        data = resp.read()
+        resp.close()
+    except urllib2.URLError:
+        return ""
     return data
 
 
