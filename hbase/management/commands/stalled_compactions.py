@@ -50,6 +50,7 @@ class Command (BaseCommand):
 
         if len(long_compacts) == 0:
             logging.info("No compactions longer than %s detected, exit", threshold)
+            self._do_alert_rses(options, [])
             return
 
         # check every long compact for stall conditions (take mtime from hdfs)
@@ -70,7 +71,13 @@ class Command (BaseCommand):
                     stall_rses.add(comp.rs)
 
         logging.info("Stalled compactions found on %d regionservers: %s", len(stall_rses), ", ".join(sorted(stall_rses)))
+        self._do_alert_rses(options, stall_rses)
 
+
+    def _do_alert_rses(self, options, stall_rses):
+        """
+        If alerting turned on, save alert file for monitoring
+        """
         if options['alert']:
             with open(options['alert_path'], 'w+') as fd:
                 if len(stall_rses) > 0:
