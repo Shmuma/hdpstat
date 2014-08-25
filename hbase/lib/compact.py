@@ -3,6 +3,7 @@ import json
 import datetime
 import logging
 import os
+import httplib
 
 import hdfs
 """
@@ -54,7 +55,7 @@ def fetch_compaction_json(server):
         resp = urllib2.urlopen(url)
         data = resp.read()
         resp.close()
-    except urllib2.URLError:
+    except urllib2.URLError, httplib.BadStatusLine:
         return ""
     return data
 
